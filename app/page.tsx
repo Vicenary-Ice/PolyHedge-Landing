@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Space_Mono, Inter } from 'next/font/google';
 
@@ -256,34 +256,6 @@ function TypewriterHeadline({ text }: { text: string }) {
       {showCursor && <span className="text-accent animate-pulse">▌</span>}
     </div>
   );
-}
-
-// ============================================================================
-// COUNTER COMPONENT
-// ============================================================================
-
-function CounterStat({ target }: { target: number }) {
-  const motionValue = useMotionValue(0);
-  const springValue = useSpring(motionValue, { duration: 1000 });
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (isInView) {
-      motionValue.set(target);
-    }
-  }, [isInView, motionValue, target]);
-
-  const [displayValue, setDisplayValue] = useState(0);
-
-  useEffect(() => {
-    const unsubscribe = springValue.on('change', (value) => {
-      setDisplayValue(Math.floor(value));
-    });
-    return () => unsubscribe();
-  }, [springValue]);
-
-  return <div ref={ref}>{displayValue}</div>;
 }
 
 // ============================================================================
@@ -1004,7 +976,7 @@ BEEN WAITING FOR."
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    const email = (e.target as HTMLFormElement).querySelector('input[type="email"]')?.value;
+                    const email = ((e.target as HTMLFormElement).querySelector('input[type="email"]') as HTMLInputElement)?.value;
                     console.log('Waitlist submission:', email);
                     // TODO: Integrate with Mailchimp or Resend API
                     alert('Thanks! Check your email for next steps.');
