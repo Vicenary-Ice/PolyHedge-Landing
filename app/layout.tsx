@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Geist } from "next/font/google";
 import "./globals.css";
+
+const geist = Geist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "PolyHedge | Alternative Data for Traders",
@@ -15,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={geist.className}>
       <body style={{ backgroundColor: "#0A0A0A", color: "#FFFFFF" }}>
         {children}
       </body>

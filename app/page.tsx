@@ -3,11 +3,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Space_Mono, Inter } from 'next/font/google';
+import { Geist } from 'next/font/google';
 
 // Font imports
-const spaceMono = Space_Mono({ subsets: ['latin'], weight: ['400', '700'] });
-const inter = Inter({ subsets: ['latin'] });
+const geist = Geist({ subsets: ['latin'] });
 
 // ============================================================================
 // TYPES
@@ -44,7 +43,7 @@ function TestimonialsCarousel() {
   const current = testimonials[currentIndex];
   return (
     <motion.div key={`testimonial-${currentIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.5 }} className="text-center">
-      <p className={`${spaceMono.className} text-lg italic text-secondary mb-6`} style={{ color: '#FFFFFF' }}>"{current.quote}"</p>
+      <p className={`${geist.className} text-lg italic text-secondary mb-6`} style={{ color: '#FFFFFF' }}>"{current.quote}"</p>
       <div className="flex items-center justify-center gap-4">
         <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold" style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}>{current.initials}</div>
         <div className="text-left"><p className="text-white font-bold text-sm">{current.name}</p><p className="text-muted text-xs" style={{ color: '#FFFFFF' }}>{current.role}</p></div>
@@ -143,7 +142,7 @@ function LoadingOverlay({ onComplete }: { onComplete: () => void }) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-black"
       style={{ backgroundColor: '#0A0A0A' }}
     >
-      <div className={`${spaceMono.className} text-6xl font-bold text-white`}>
+      <div className={`${geist.className} text-6xl font-bold text-white`}>
         {displayedText}
       </div>
     </motion.div>
@@ -168,7 +167,7 @@ function GlitchLogo() {
     <motion.div
       animate={isGlitching ? { x: [-4, 4, -4, 0] } : { x: 0 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className={`${spaceMono.className} font-bold text-white text-lg`}
+      className={`${geist.className} font-bold text-white text-lg`}
     >
       PolyHedge<span className="text-accent">_</span>
     </motion.div>
@@ -203,7 +202,7 @@ function TypewriterHeadline({ text }: { text: string }) {
   }, [isInView, text]);
 
   return (
-    <div ref={ref} className={`${spaceMono.className} text-5xl md:text-6xl font-bold text-white leading-tight`}>
+    <div ref={ref} className={`${geist.className} text-5xl md:text-6xl font-bold text-white leading-tight`}>
       {displayedText}
       {showCursor && <span className="text-accent animate-pulse">▌</span>}
     </div>
@@ -223,7 +222,7 @@ function StatCard({ value, headline, description }: StatCardProps) {
       className="bg-card border border-border rounded p-8"
       style={{ backgroundColor: '#111111', borderColor: '#1E1E1E' }}
     >
-      <div className={`${spaceMono.className} text-4xl font-bold text-accent mb-3`} style={{ color: '#00FF94' }}>
+      <div className={`${geist.className} text-4xl font-bold text-accent mb-3`} style={{ color: '#00FF94' }}>
         {value}
       </div>
       <h3 className="text-white font-bold mb-2">{headline}</h3>
@@ -251,7 +250,7 @@ function PillarCard({ number, title, description }: PillarCardProps) {
         borderTop: '2px solid #00FF94',
       }}
     >
-      <div className={`${spaceMono.className} text-sm font-bold mb-4`} style={{ color: '#00FF94' }}>
+      <div className={`${geist.className} text-sm font-bold mb-4`} style={{ color: '#00FF94' }}>
         {number}
       </div>
       <h3 className="text-white font-bold mb-4 text-lg">{title}</h3>
@@ -338,7 +337,7 @@ function TickerBar() {
 
   return (
     <div
-      className={`${spaceMono.className} fixed top-0 left-0 right-0 z-40 w-full overflow-hidden bg-black border-b`}
+      className={`${geist.className} fixed top-0 left-0 right-0 z-40 w-full overflow-hidden bg-black border-b`}
       style={{ backgroundColor: '#0A0A0A', borderColor: '#1E1E1E' }}
     >
       <style>{`
@@ -413,7 +412,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
           target="_blank"
           rel="noopener noreferrer"
           whileHover={{ scale: 1.05 }}
-          className={`${spaceMono.className} px-6 py-2 border-2 rounded-full text-black font-bold text-sm flex items-center gap-2`}
+          className={`${geist.className} px-6 py-2 border-2 rounded-full text-black font-bold text-sm flex items-center gap-2`}
           style={{ borderColor: '#00FF94', color: '#0A0A0A', backgroundColor: '#00FF94' }}
         >
           &gt; ACCESS DEMO
@@ -565,7 +564,7 @@ export default function Page() {
         }
       `}</style>
 
-      <div className={inter.className}>
+      <div className={geist.className}>
         <AnimatePresence>
           {!loadingComplete && <LoadingOverlay onComplete={() => {
             setLoadingComplete(true);
@@ -617,7 +616,7 @@ BEEN WAITING FOR."
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.05 }}
-                    className={`${spaceMono.className} px-10 py-4 rounded-full font-bold text-lg flex items-center gap-2`}
+                    className={`${geist.className} px-10 py-4 rounded-full font-bold text-lg flex items-center gap-2`}
                     style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}
                   >
                     &gt; ACCESS DEMO →
@@ -625,7 +624,7 @@ BEEN WAITING FOR."
                   <motion.a
                     href="#features"
                     whileHover={{ scale: 1.05 }}
-                    className={`${spaceMono.className} px-10 py-4 rounded-full font-bold text-lg border-2`}
+                    className={`${geist.className} px-10 py-4 rounded-full font-bold text-lg border-2`}
                     style={{ borderColor: '#00FF94', color: '#FFFFFF' }}
                   >
                     GET STARTED
@@ -644,10 +643,10 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // THE PROBLEM
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-8`}>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-8`}>
                   Institutional traders have Bloomberg. Everyone else has nothing.
                 </h2>
                 <div className="space-y-6">
@@ -671,14 +670,14 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // THE PLATFORM
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-12`}>One Platform. Every Signal.</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-12`}>One Platform. Every Signal.</h2>
 
                 {/* Terminal-style dashboard mockup */}
                 <div
-                  className={`${spaceMono.className} p-8 rounded border-2 mb-8 bg-black`}
+                  className={`${geist.className} p-8 rounded border-2 mb-8 bg-black`}
                   style={{ backgroundColor: '#111111', borderColor: '#1E1E1E', borderTop: '2px solid #00FF94' }}
                 >
                   <div className="text-accent text-sm mb-6" style={{ color: '#00FF94' }}>
@@ -754,10 +753,10 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // DATA ARCHITECTURE
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Three Pillars. Zero Overlap.</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-16`}>Three Pillars. Zero Overlap.</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   <PillarCard
@@ -798,7 +797,7 @@ BEEN WAITING FOR."
                     animation: symbolScroll 60s linear infinite;
                   }
                 `}</style>
-                <div className={`${spaceMono.className} symbol-scroll whitespace-nowrap text-muted text-sm`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} symbol-scroll whitespace-nowrap text-muted text-sm`} style={{ color: '#FFFFFF' }}>
                   AAPL • MSFT • GOOGL • AMZN • NVDA • TSLA • META • NFLX • ADBE • CRM • INTU • PYPL • ORCL • AVGO • QCOM • ASML • AMAT • MU • AMD • NXPI • JKHY • PAYX • VRSN • TTWO • CDNS • SNPS • TEAM • FTNT • OKTA • SPLK • ZM • DDOG • SNOW • CRWD • ESTC • AAPL • MSFT • GOOGL • AMZN • NVDA • TSLA • META • NFLX • ADBE • CRM • INTU • PYPL • ORCL • AVGO • QCOM • ASML • AMAT • MU • AMD • NXPI • JKHY • PAYX • VRSN • TTWO • CDNS • SNPS • TEAM • FTNT • OKTA • SPLK • ZM • DDOG • SNOW • CRWD • ESTC •
                 </div>
               </div>
@@ -809,15 +808,15 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // COVERAGE
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-12`}>What We Cover</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-12`}>What We Cover</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   {/* Stock Markets */}
                   <div>
-                    <h3 className={`${spaceMono.className} text-2xl font-bold text-white mb-6`}>STOCK MARKETS</h3>
+                    <h3 className={`${geist.className} text-2xl font-bold text-white mb-6`}>STOCK MARKETS</h3>
                     <p className="text-secondary text-base mb-6" style={{ color: '#FFFFFF' }}>
                       Full NYSE coverage with signals mapped to earnings surprises, corporate events, supply chain shifts, regulatory actions, and executive movements. Real-time ingestion of institutional filings, SEC releases, media sentiment, and insider trading activity. Every public equity market above $1B market cap.
                     </p>
@@ -825,7 +824,7 @@ BEEN WAITING FOR."
 
                   {/* Prediction Markets */}
                   <div>
-                    <h3 className={`${spaceMono.className} text-2xl font-bold text-white mb-6`}>PREDICTION MARKETS</h3>
+                    <h3 className={`${geist.className} text-2xl font-bold text-white mb-6`}>PREDICTION MARKETS</h3>
                     <p className="text-secondary text-base mb-6" style={{ color: '#FFFFFF' }}>
                       Niche objective non-manipulable market categories currently in selection. Categories span geopolitics, regulatory outcomes, scientific breakthroughs, and financial events. Announcement of initial category suite coming soon. Founding clients get early access to our selection criteria.
                     </p>
@@ -844,10 +843,10 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // EDGE
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Why This Matters</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-16`}>Why This Matters</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <StatCard
@@ -884,10 +883,10 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // SOCIAL PROOF
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Trusted by Traders</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-16`}>Trusted by Traders</h2>
 
                 <div className="relative">
                   <AnimatePresence mode="wait">
@@ -917,10 +916,10 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-8 text-muted`} style={{ color: '#FFFFFF' }}>
+                <div className={`${geist.className} text-sm font-bold mb-8 text-muted`} style={{ color: '#FFFFFF' }}>
                   // EARLY ACCESS
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-6`}>Get In Before The Edge Is Gone.</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-6`}>Get In Before The Edge Is Gone.</h2>
                 <p className="text-secondary text-lg mb-12" style={{ color: '#FFFFFF' }}>
                   Onboarding our first wave of traders and institutional clients. Join the waitlist for founding member pricing.
                 </p>
@@ -940,7 +939,7 @@ BEEN WAITING FOR."
                     type="email"
                     placeholder="> your@email.com"
                     required
-                    className={`${spaceMono.className} flex-1 md:flex-none px-6 py-4 rounded bg-card border-2 text-white placeholder-muted focus:outline-none focus:border-accent`}
+                    className={`${geist.className} flex-1 md:flex-none px-6 py-4 rounded bg-card border-2 text-white placeholder-muted focus:outline-none focus:border-accent`}
                     style={{
                       backgroundColor: '#111111',
                       borderColor: '#333333',
@@ -950,7 +949,7 @@ BEEN WAITING FOR."
                   <motion.button
                     type="submit"
                     whileHover={{ scale: 1.05 }}
-                    className={`${spaceMono.className} px-8 py-4 rounded-full font-bold text-lg`}
+                    className={`${geist.className} px-8 py-4 rounded-full font-bold text-lg`}
                     style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}
                   >
                     &gt; JOIN WAITLIST
@@ -963,7 +962,7 @@ BEEN WAITING FOR."
                 FOOTER
                 ================================================================ */}
             <footer
-              className={`${spaceMono.className} w-full py-12 px-8 bg-black border-t`}
+              className={`${geist.className} w-full py-12 px-8 bg-black border-t`}
               style={{ backgroundColor: '#0A0A0A', borderColor: '#1E1E1E' }}
             >
               <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
