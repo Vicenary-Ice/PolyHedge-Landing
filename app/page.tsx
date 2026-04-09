@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Geist } from 'next/font/google';
+import { DottedSurface } from '@/components/ui/dotted-surface';
+import { cn } from '@/lib/utils';
 
 // Font imports
 const geist = Geist({ subsets: ['latin'] });
@@ -120,12 +122,12 @@ function LoadingOverlay({ onComplete }: { onComplete: () => void }) {
         charIndex++;
       } else {
         clearInterval(interval);
-        // Wait 600ms, then trigger exit
+        // Wait for typing + 1.5s delay + 2s slide duration
         setTimeout(() => {
           onComplete();
-        }, 600);
+        }, 4700);
       }
-    }, 110);
+    }, 120);
 
     return () => clearInterval(interval);
   }, [isInView, onComplete]);
@@ -135,7 +137,7 @@ function LoadingOverlay({ onComplete }: { onComplete: () => void }) {
       ref={containerRef}
       initial={{ y: 0 }}
       animate={{ y: -1200 }}
-      transition={{ delay: displayedText.length * 0.11 + 0.6, duration: 0.8, ease: 'easeInOut' }}
+      transition={{ delay: displayedText.length * 0.11 + 1.5, duration: 2, ease: 'easeInOut' }}
       onAnimationComplete={() => {
         // Overlay is fully out, content below will start fading in
       }}
@@ -178,7 +180,7 @@ function GlitchLogo() {
 // TYPEWRITER HEADLINE
 // ============================================================================
 
-function TypewriterHeadline({ text }: { text: string }) {
+function TypewriterHeadline({ text, delay = 0 }: { text: string; delay?: number }) {
   const [displayedText, setDisplayedText] = useState('');
   const [showCursor, setShowCursor] = useState(false);
   const ref = useRef(null);
@@ -187,19 +189,23 @@ function TypewriterHeadline({ text }: { text: string }) {
   useEffect(() => {
     if (!isInView) return;
 
-    let charIndex = 0;
-    const interval = setInterval(() => {
-      if (charIndex < text.length) {
-        setDisplayedText(text.slice(0, charIndex + 1));
-        charIndex++;
-      } else {
-        clearInterval(interval);
-        setShowCursor(true);
-      }
-    }, 50);
+    const startTimer = setTimeout(() => {
+      let charIndex = 0;
+      const interval = setInterval(() => {
+        if (charIndex < text.length) {
+          setDisplayedText(text.slice(0, charIndex + 1));
+          charIndex++;
+        } else {
+          clearInterval(interval);
+          setShowCursor(true);
+        }
+      }, 50);
 
-    return () => clearInterval(interval);
-  }, [isInView, text]);
+      return () => clearInterval(interval);
+    }, delay);
+
+    return () => clearTimeout(startTimer);
+  }, [isInView, text, delay]);
 
   return (
     <div ref={ref} className={`${geist.className} text-5xl md:text-6xl font-bold text-white leading-tight`}>
@@ -583,25 +589,25 @@ export default function Page() {
               className="relative w-full h-screen bg-black flex items-center justify-center overflow-hidden pt-32"
               style={{ backgroundColor: '#0A0A0A' }}
             >
-              <HeroBackground />
+              <DottedSurface />
               <FloatingParticles />
               <motion.div
-                className="relative z-10 max-w-4xl mx-auto px-8 text-center"
-                initial={{ opacity: 0 }}
+                className="relative z-20 max-w-4xl mx-auto px-8 text-center -mt-64"
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
               >
                 <TypewriterHeadline
                   text="THE DATA INFRASTRUCTURE
 TRADERS HAVE
 BEEN WAITING FOR."
+                  delay={2500}
                 />
                 <motion.p
                   className={`mt-6 text-lg text-secondary max-w-2xl mx-auto`}
                   style={{ color: '#FFFFFF' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 1.2, duration: 0.6 }}
+                  transition={{ delay: 0.5, duration: 0.6 }}
                 >
                   Proprietary alternative data. Three collection pillars. One unified intelligence platform.
                 </motion.p>
@@ -609,7 +615,7 @@ BEEN WAITING FOR."
                   className="mt-12 flex gap-6 justify-center flex-wrap"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 1.4, duration: 0.6 }}
+                  transition={{ delay: 0.7, duration: 0.6 }}
                 >
                   <motion.a
                     href="#demo"
