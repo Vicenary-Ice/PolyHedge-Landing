@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PolyHedge | Alternative Data for Serious Traders",
+  title: "PolyHedge | Alternative Data for Traders",
   description: "Proprietary alternative data intelligence platform for stock market and prediction market traders.",
   icons: {
     icon: "/favicon.ico",

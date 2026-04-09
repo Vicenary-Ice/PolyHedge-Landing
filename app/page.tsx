@@ -594,7 +594,7 @@ export default function Page() {
               >
                 <TypewriterHeadline
                   text="THE DATA INFRASTRUCTURE
-SERIOUS TRADERS HAVE
+TRADERS HAVE
 BEEN WAITING FOR."
                 />
                 <motion.p
@@ -974,7 +974,7 @@ BEEN WAITING FOR."
 
                 {/* Center: Tagline */}
                 <div className="text-center text-muted text-sm" style={{ color: '#FFFFFF' }}>
-                  // ALTERNATIVE DATA FOR SERIOUS TRADERS
+                  // ALTERNATIVE DATA FOR TRADERS
                 </div>
 
                 {/* Right: Links and Social */}
