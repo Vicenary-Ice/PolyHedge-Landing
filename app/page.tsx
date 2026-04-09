@@ -33,7 +33,7 @@ function TestimonialsCarousel() {
   const testimonials = [
     { name: 'Jordan Pierce', role: 'Prediction Market Trader', quote: 'PolyHedge gave us the infrastructure we needed. Real-time signals we can actually trust.', initials: 'JP' },
     { name: 'Alex Chen', role: 'Algorithmic Trader', quote: 'The three-pillar approach is unmatched. We went from blind to informed overnight.', initials: 'AC' },
-    { name: 'Sam Khalil', role: 'Hedge Fund Manager', quote: 'Alternative data done right. This is how serious traders move markets.', initials: 'SK' },
+    { name: 'Sam Khalil', role: 'Hedge Fund Manager', quote: 'Alternative data done right. This is how traders move markets.', initials: 'SK' },
     { name: 'Morgan Hayes', role: 'Prop Trader', quote: 'The accuracy compounds with every prediction. We saw edge in week one.', initials: 'MH' },
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -44,10 +44,10 @@ function TestimonialsCarousel() {
   const current = testimonials[currentIndex];
   return (
     <motion.div key={`testimonial-${currentIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.5 }} className="text-center">
-      <p className={`${spaceMono.className} text-lg italic text-secondary mb-6`} style={{ color: '#888888' }}>"{current.quote}"</p>
+      <p className={`${spaceMono.className} text-lg italic text-secondary mb-6`} style={{ color: '#FFFFFF' }}>"{current.quote}"</p>
       <div className="flex items-center justify-center gap-4">
         <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold" style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}>{current.initials}</div>
-        <div className="text-left"><p className="text-white font-bold text-sm">{current.name}</p><p className="text-muted text-xs" style={{ color: '#444444' }}>{current.role}</p></div>
+        <div className="text-left"><p className="text-white font-bold text-sm">{current.name}</p><p className="text-muted text-xs" style={{ color: '#FFFFFF' }}>{current.role}</p></div>
       </div>
     </motion.div>
   );
@@ -227,7 +227,7 @@ function StatCard({ value, headline, description }: StatCardProps) {
         {value}
       </div>
       <h3 className="text-white font-bold mb-2">{headline}</h3>
-      <p className="text-secondary text-sm" style={{ color: '#888888' }}>
+      <p className="text-secondary text-sm" style={{ color: '#FFFFFF' }}>
         {description}
       </p>
     </motion.div>
@@ -255,7 +255,7 @@ function PillarCard({ number, title, description }: PillarCardProps) {
         {number}
       </div>
       <h3 className="text-white font-bold mb-4 text-lg">{title}</h3>
-      <p className="text-secondary text-sm" style={{ color: '#888888' }}>
+      <p className="text-secondary text-sm" style={{ color: '#FFFFFF' }}>
         {description}
       </p>
     </motion.div>
@@ -599,7 +599,7 @@ BEEN WAITING FOR."
                 />
                 <motion.p
                   className={`mt-6 text-lg text-secondary max-w-2xl mx-auto`}
-                  style={{ color: '#888888' }}
+                  style={{ color: '#FFFFFF' }}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
@@ -644,18 +644,18 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // THE PROBLEM
                 </div>
                 <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-8`}>
                   Institutional traders have Bloomberg. Everyone else has nothing.
                 </h2>
                 <div className="space-y-6">
-                  <p className="text-secondary text-lg" style={{ color: '#888888' }}>
-                    Stock market traders with access to Bloomberg terminals enjoy real-time market data, news flows, and alternative data integrations. They have hundreds of vendors to choose from. But prediction market traders — operating in markets worth trillions globally — have no equivalent infrastructure. The entire category is forced to make real-money decisions on public information alone.
+                  <p className="text-secondary text-lg" style={{ color: '#FFFFFF' }}>
+                    Professional stock market traders with access to Bloomberg terminals enjoy real-time market data, news flows, and alternative data integrations. They have hundreds of vendors to choose from as well as numerous alternative data companies to help give them an edge. But prediction market traders as well as day traders have little to no equivalent infrastructure.
                   </p>
-                  <p className="text-secondary text-lg" style={{ color: '#888888' }}>
-                    This is the gap PolyHedge fills. We're building the Bloomberg equivalent for prediction markets — a unified platform that ingests proprietary alternative data, synthesizes it into actionable signals, and delivers it to traders who understand its edge.
+                  <p className="text-secondary text-lg" style={{ color: '#FFFFFF' }}>
+                    This is the gap PolyHedge fills. We're building the Bloomberg equivalent for prediction markets and day traders. Our data, available via a subscription, provides prediction market traders and day traders with an edge over the rest of the market.
                   </p>
                 </div>
               </motion.div>
@@ -671,7 +671,7 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // THE PLATFORM
                 </div>
                 <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-12`}>One Platform. Every Signal.</h2>
@@ -692,7 +692,7 @@ BEEN WAITING FOR."
                         AAPL EARNINGS
                       </div>
                       <div className="text-white text-2xl font-bold mb-2">0.847</div>
-                      <div className="text-muted text-xs" style={{ color: '#444444' }}>
+                      <div className="text-muted text-xs" style={{ color: '#FFFFFF' }}>
                         SIGNAL STRENGTH: ████████░░
                       </div>
                     </div>
@@ -701,7 +701,7 @@ BEEN WAITING FOR."
                         FED RATE HOLD
                       </div>
                       <div className="text-white text-2xl font-bold mb-2">0.732</div>
-                      <div className="text-muted text-xs" style={{ color: '#444444' }}>
+                      <div className="text-muted text-xs" style={{ color: '#FFFFFF' }}>
                         SIGNAL STRENGTH: ███████░░░
                       </div>
                     </div>
@@ -710,7 +710,7 @@ BEEN WAITING FOR."
                         FDA APPROVAL
                       </div>
                       <div className="text-white text-2xl font-bold mb-2">0.614</div>
-                      <div className="text-muted text-xs" style={{ color: '#444444' }}>
+                      <div className="text-muted text-xs" style={{ color: '#FFFFFF' }}>
                         SIGNAL STRENGTH: ██████░░░░
                       </div>
                     </div>
@@ -722,23 +722,23 @@ BEEN WAITING FOR."
                       DATA SOURCES ACTIVE
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#444444', borderColor: '#1E1E1E' }}>
+                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#FFFFFF', borderColor: '#1E1E1E' }}>
                         WEB AGENTS
                       </span>
-                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#444444', borderColor: '#1E1E1E' }}>
+                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#FFFFFF', borderColor: '#1E1E1E' }}>
                         MIROFISH
                       </span>
-                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#444444', borderColor: '#1E1E1E' }}>
+                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#FFFFFF', borderColor: '#1E1E1E' }}>
                         MASS OUTREACH
                       </span>
-                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#444444', borderColor: '#1E1E1E' }}>
+                      <span className="text-muted text-xs px-3 py-1 rounded border" style={{ color: '#FFFFFF', borderColor: '#1E1E1E' }}>
                         847 FEEDS
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <p className="text-secondary text-lg mb-8" style={{ color: '#888888' }}>
+                <p className="text-secondary text-lg mb-8" style={{ color: '#FFFFFF' }}>
                   Real-time signal synthesis from proprietary alternative data sources. NYSE coverage plus emerging prediction market categories. Terminal-style UI built for traders. <a href="#demo" className="text-accent underline" style={{ color: '#00FF94' }}>Request demo →</a>
                 </p>
               </motion.div>
@@ -754,7 +754,7 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // DATA ARCHITECTURE
                 </div>
                 <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Three Pillars. Zero Overlap.</h2>
@@ -798,7 +798,7 @@ BEEN WAITING FOR."
                     animation: symbolScroll 60s linear infinite;
                   }
                 `}</style>
-                <div className={`${spaceMono.className} symbol-scroll whitespace-nowrap text-muted text-sm`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} symbol-scroll whitespace-nowrap text-muted text-sm`} style={{ color: '#FFFFFF' }}>
                   AAPL • MSFT • GOOGL • AMZN • NVDA • TSLA • META • NFLX • ADBE • CRM • INTU • PYPL • ORCL • AVGO • QCOM • ASML • AMAT • MU • AMD • NXPI • JKHY • PAYX • VRSN • TTWO • CDNS • SNPS • TEAM • FTNT • OKTA • SPLK • ZM • DDOG • SNOW • CRWD • ESTC • AAPL • MSFT • GOOGL • AMZN • NVDA • TSLA • META • NFLX • ADBE • CRM • INTU • PYPL • ORCL • AVGO • QCOM • ASML • AMAT • MU • AMD • NXPI • JKHY • PAYX • VRSN • TTWO • CDNS • SNPS • TEAM • FTNT • OKTA • SPLK • ZM • DDOG • SNOW • CRWD • ESTC •
                 </div>
               </div>
@@ -809,7 +809,7 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // COVERAGE
                 </div>
                 <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-12`}>What We Cover</h2>
@@ -818,7 +818,7 @@ BEEN WAITING FOR."
                   {/* Stock Markets */}
                   <div>
                     <h3 className={`${spaceMono.className} text-2xl font-bold text-white mb-6`}>STOCK MARKETS</h3>
-                    <p className="text-secondary text-base mb-6" style={{ color: '#888888' }}>
+                    <p className="text-secondary text-base mb-6" style={{ color: '#FFFFFF' }}>
                       Full NYSE coverage with signals mapped to earnings surprises, corporate events, supply chain shifts, regulatory actions, and executive movements. Real-time ingestion of institutional filings, SEC releases, media sentiment, and insider trading activity. Every public equity market above $1B market cap.
                     </p>
                   </div>
@@ -826,7 +826,7 @@ BEEN WAITING FOR."
                   {/* Prediction Markets */}
                   <div>
                     <h3 className={`${spaceMono.className} text-2xl font-bold text-white mb-6`}>PREDICTION MARKETS</h3>
-                    <p className="text-secondary text-base mb-6" style={{ color: '#888888' }}>
+                    <p className="text-secondary text-base mb-6" style={{ color: '#FFFFFF' }}>
                       Niche objective non-manipulable market categories currently in selection. Categories span geopolitics, regulatory outcomes, scientific breakthroughs, and financial events. Announcement of initial category suite coming soon. Founding clients get early access to our selection criteria.
                     </p>
                   </div>
@@ -844,7 +844,7 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // EDGE
                 </div>
                 <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Why This Matters</h2>
@@ -884,10 +884,10 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#FFFFFF' }}>
                   // SOCIAL PROOF
                 </div>
-                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Trusted by Serious Traders</h2>
+                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Trusted by Traders</h2>
 
                 <div className="relative">
                   <AnimatePresence mode="wait">
@@ -917,11 +917,11 @@ BEEN WAITING FOR."
                 initial={{ opacity: 0, y: 40 }}
                 transition={{ duration: 0.6 }}
               >
-                <div className={`${spaceMono.className} text-sm font-bold mb-8 text-muted`} style={{ color: '#444444' }}>
+                <div className={`${spaceMono.className} text-sm font-bold mb-8 text-muted`} style={{ color: '#FFFFFF' }}>
                   // EARLY ACCESS
                 </div>
                 <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-6`}>Get In Before The Edge Is Gone.</h2>
-                <p className="text-secondary text-lg mb-12" style={{ color: '#888888' }}>
+                <p className="text-secondary text-lg mb-12" style={{ color: '#FFFFFF' }}>
                   Onboarding our first wave of traders and institutional clients. Join the waitlist for founding member pricing.
                 </p>
 
@@ -973,16 +973,16 @@ BEEN WAITING FOR."
                 </div>
 
                 {/* Center: Tagline */}
-                <div className="text-center text-muted text-sm" style={{ color: '#444444' }}>
+                <div className="text-center text-muted text-sm" style={{ color: '#FFFFFF' }}>
                   // ALTERNATIVE DATA FOR SERIOUS TRADERS
                 </div>
 
                 {/* Right: Links and Social */}
                 <div className="flex gap-6 items-center justify-end flex-wrap">
-                  <a href="#privacy" className="text-muted hover:text-white text-sm transition" style={{ color: '#444444' }}>
+                  <a href="#privacy" className="text-muted hover:text-white text-sm transition" style={{ color: '#FFFFFF' }}>
                     Privacy Policy
                   </a>
-                  <a href="#terms" className="text-muted hover:text-white text-sm transition" style={{ color: '#444444' }}>
+                  <a href="#terms" className="text-muted hover:text-white text-sm transition" style={{ color: '#FFFFFF' }}>
                     Terms of Service
                   </a>
                 </div>
