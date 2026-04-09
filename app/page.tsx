@@ -26,6 +26,130 @@ interface PillarCardProps {
 }
 
 // ============================================================================
+// SCROLLING FEED COMPONENT
+// ============================================================================
+
+function ScrollingFeed() {
+  const signals = [
+    { name: 'AAPL EARNINGS', value: 0.847, delta: 0.012 },
+    { name: 'FED RATE HOLD', value: 0.732, delta: 0.008 },
+    { name: 'FDA APPROVAL', value: 0.614, delta: -0.005 },
+    { name: 'SCOTUS RULING', value: 0.589, delta: 0.023 },
+    { name: 'SUPPLY CHAIN SHOCK', value: 0.421, delta: 0.034 },
+    { name: 'EARNINGS BEAT', value: 0.756, delta: 0.019 },
+    { name: 'REGULATORY FILING', value: 0.523, delta: -0.007 },
+    { name: 'EXEC RESIGNATION', value: 0.812, delta: 0.041 },
+    { name: 'PATENT APPROVED', value: 0.687, delta: 0.015 },
+  ];
+
+  const [feedItems, setFeedItems] = useState(signals.slice(0, 5));
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFeedItems((prev) => {
+        const nextSignal = signals[Math.floor(Math.random() * signals.length)];
+        return [...prev.slice(1), { ...nextSignal }];
+      });
+      setScrollY((prev) => prev + 62);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className={`${spaceMono.className} relative h-80 overflow-hidden`} style={{ backgroundColor: '#111111' }}>
+      <motion.div animate={{ y: -scrollY }} transition={{ duration: 0.5, ease: 'easeInOut' }} className="space-y-0">
+        {feedItems.map((item, idx) => (
+          <div key={idx} className="data-row-glow p-3 border-l-2 pl-4" style={{ borderColor: '#00FF94' }}>
+            <span className="text-accent text-xs" style={{ color: '#00FF94' }}>[{new Date().toLocaleTimeString()}]</span>
+            <span className="text-white text-xs ml-2">{item.name} → {item.value.toFixed(3)}</span>
+            <span className="text-accent text-xs ml-4" style={{ color: '#00FF94' }}>{item.delta >= 0 ? '↑' : '↓'} {Math.abs(item.delta).toFixed(3)}</span>
+          </div>
+        ))}
+      </motion.div>
+      <div className="absolute top-0 left-0 right-0 h-12 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #111111, transparent)' }} />
+      <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none" style={{ background: 'linear-gradient(to top, #111111, transparent)' }} />
+    </div>
+  );
+}
+
+// ============================================================================
+// TESTIMONIALS CAROUSEL COMPONENT
+// ============================================================================
+
+function TestimonialsCarousel() {
+  const testimonials = [
+    { name: 'Jordan Pierce', role: 'Prediction Market Trader', quote: 'PolyHedge gave us the infrastructure we needed. Real-time signals we can actually trust.', initials: 'JP' },
+    { name: 'Alex Chen', role: 'Algorithmic Trader', quote: 'The three-pillar approach is unmatched. We went from blind to informed overnight.', initials: 'AC' },
+    { name: 'Sam Khalil', role: 'Hedge Fund Manager', quote: 'Alternative data done right. This is how serious traders move markets.', initials: 'SK' },
+    { name: 'Morgan Hayes', role: 'Prop Trader', quote: 'The accuracy compounds with every prediction. We saw edge in week one.', initials: 'MH' },
+  ];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentIndex((prev) => (prev + 1) % testimonials.length), 4000);
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+  const current = testimonials[currentIndex];
+  return (
+    <motion.div key={`testimonial-${currentIndex}`} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.5 }} className="text-center">
+      <p className={`${spaceMono.className} text-lg italic text-secondary mb-6`} style={{ color: '#888888' }}>"{current.quote}"</p>
+      <div className="flex items-center justify-center gap-4">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold" style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}>{current.initials}</div>
+        <div className="text-left"><p className="text-white font-bold text-sm">{current.name}</p><p className="text-muted text-xs" style={{ color: '#444444' }}>{current.role}</p></div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
+// FLOATING PARTICLES COMPONENT
+// ============================================================================
+
+function FloatingParticles() {
+  const particles = Array.from({ length: 18 }).map((_, i) => ({
+    id: i,
+    startX: Math.random() * 100,
+    startY: Math.random() * 100,
+    size: Math.random() * 2 + 2,
+    duration: Math.random() * 15 + 15,
+    delay: Math.random() * 5,
+    color: Math.random() > 0.5 ? '#FFFFFF' : '#00FF94',
+    opacity: Math.random() * 0.2 + 0.2,
+  }));
+
+  return (
+    <>
+      {particles.map((particle) => (
+        <motion.div
+          key={particle.id}
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            left: `${particle.startX}%`,
+            top: `${particle.startY}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            backgroundColor: particle.color,
+            opacity: particle.opacity,
+            zIndex: 5,
+          }}
+          animate={{
+            y: [-100, 100],
+            x: [0, Math.random() * 20 - 10],
+          }}
+          transition={{
+            duration: particle.duration,
+            delay: particle.delay,
+            repeat: Infinity,
+            repeatType: 'loop',
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+// ============================================================================
 // LOADING OVERLAY COMPONENT
 // ============================================================================
 
@@ -319,7 +443,7 @@ function TickerBar() {
 // NAVBAR COMPONENT
 // ============================================================================
 
-function Navbar() {
+function Navbar({ activeSection }: { activeSection: string }) {
   return (
     <nav
       className={`fixed top-12 left-0 right-0 z-30 bg-black border-b flex items-center justify-between px-8 py-4`}
@@ -327,13 +451,37 @@ function Navbar() {
     >
       <GlitchLogo />
       <div className="flex items-center gap-8">
-        <a href="#features" className="text-secondary hover:text-white transition" style={{ color: '#888888' }}>
+        <a
+          href="#features"
+          className="nav-link transition"
+          style={{
+            color: activeSection === 'features' ? '#FFFFFF' : '#888888',
+            borderBottom: activeSection === 'features' ? '2px solid #00FF94' : 'none',
+            paddingBottom: '2px',
+          }}
+        >
           Features
         </a>
-        <a href="#coverage" className="text-secondary hover:text-white transition" style={{ color: '#888888' }}>
+        <a
+          href="#coverage"
+          className="nav-link transition"
+          style={{
+            color: activeSection === 'coverage' ? '#FFFFFF' : '#888888',
+            borderBottom: activeSection === 'coverage' ? '2px solid #00FF94' : 'none',
+            paddingBottom: '2px',
+          }}
+        >
           Coverage
         </a>
-        <a href="#pricing" className="text-secondary hover:text-white transition" style={{ color: '#888888' }}>
+        <a
+          href="#pricing"
+          className="nav-link transition"
+          style={{
+            color: activeSection === 'pricing' ? '#FFFFFF' : '#888888',
+            borderBottom: activeSection === 'pricing' ? '2px solid #00FF94' : 'none',
+            paddingBottom: '2px',
+          }}
+        >
           Pricing
         </a>
         <motion.a
@@ -358,11 +506,43 @@ function Navbar() {
 
 export default function Page() {
   const [loadingComplete, setLoadingComplete] = useState(false);
+  const [activeSection, setActiveSection] = useState('');
+
+  // Scroll-spy observer
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '-50% 0px -50% 0px',
+      threshold: 0,
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    const sections = document.querySelectorAll('[data-section]');
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      sections.forEach((section) => observer.unobserve(section));
+    };
+  }, []);
 
   return (
     <>
       <style>{`
-        html, body {
+        html {
+          background-color: #0A0A0A;
+          scroll-behavior: smooth;
+        }
+
+        body {
           background-color: #0A0A0A;
         }
 
@@ -419,17 +599,58 @@ export default function Page() {
         .text-muted {
           color: #444444;
         }
+
+        /* Glow effects for cards */
+        .glow-card {
+          transition: all 0.3s ease;
+          border: 2px solid #1E1E1E;
+        }
+
+        .glow-card:hover {
+          border-color: #00FF94;
+          box-shadow: 0 0 20px rgba(0, 255, 148, 0.15);
+        }
+
+        /* Glow effects for buttons */
+        .glow-btn {
+          transition: all 0.3s ease;
+        }
+
+        .glow-btn:hover {
+          box-shadow: 0 0 25px rgba(0, 255, 148, 0.4);
+        }
+
+        /* Data row glow on hover */
+        .data-row-glow {
+          transition: all 0.2s ease;
+        }
+
+        .data-row-glow:hover {
+          background-color: rgba(0, 255, 148, 0.05);
+          border-color: #00FF94 !important;
+        }
+
+        /* Navigation link styles */
+        .nav-link {
+          transition: all 0.2s ease;
+          position: relative;
+        }
+
+        .nav-link:hover {
+          color: #FFFFFF;
+        }
       `}</style>
 
-      <AnimatePresence>
-        {!loadingComplete && <LoadingOverlay onComplete={() => setLoadingComplete(true)} />}
-      </AnimatePresence>
-
       <div className={inter.className}>
-        {loadingComplete && (
-          <>
-            <TickerBar />
-            <Navbar />
+        <AnimatePresence>
+          {!loadingComplete && <LoadingOverlay onComplete={() => {
+            setLoadingComplete(true);
+          }} />}
+        </AnimatePresence>
+
+        <>
+          <TickerBar />
+          <Navbar activeSection={activeSection} />
 
             {/* ================================================================
                 HERO SECTION
@@ -440,6 +661,7 @@ export default function Page() {
               style={{ backgroundColor: '#0A0A0A' }}
             >
               <HeroBackground />
+              <FloatingParticles />
               <motion.div
                 className="relative z-10 max-w-4xl mx-auto px-8 text-center"
                 initial={{ opacity: 0 }}
@@ -491,7 +713,7 @@ BEEN WAITING FOR."
             {/* ================================================================
                 THE PROBLEM SECTION
                 ================================================================ */}
-            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }}>
+            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="features">
               <motion.div
                 className="max-w-4xl mx-auto"
                 whileInView={{ opacity: 1, y: 0 }}
@@ -518,7 +740,7 @@ BEEN WAITING FOR."
             {/* ================================================================
                 THE PLATFORM SECTION
                 ================================================================ */}
-            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }}>
+            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="platform">
               <motion.div
                 className="max-w-4xl mx-auto"
                 whileInView={{ opacity: 1, y: 0 }}
@@ -601,7 +823,7 @@ BEEN WAITING FOR."
             {/* ================================================================
                 DATA ARCHITECTURE SECTION
                 ================================================================ */}
-            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }}>
+            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="architecture">
               <motion.div
                 className="max-w-6xl mx-auto"
                 whileInView={{ opacity: 1, y: 0 }}
@@ -636,7 +858,7 @@ BEEN WAITING FOR."
             {/* ================================================================
                 COVERAGE SECTION
                 ================================================================ */}
-            <section className="w-full py-24 px-8 bg-black relative overflow-hidden" style={{ backgroundColor: '#0A0A0A' }}>
+            <section className="w-full py-24 px-8 bg-black relative overflow-hidden" style={{ backgroundColor: '#0A0A0A' }} data-section id="coverage">
               {/* Background ticker - NYSE symbols */}
               <div className="absolute inset-0 overflow-hidden opacity-8 z-0">
                 <style>{`
@@ -691,7 +913,7 @@ BEEN WAITING FOR."
             {/* ================================================================
                 EDGE SECTION - STATS GRID
                 ================================================================ */}
-            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }}>
+            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="edge">
               <motion.div
                 className="max-w-6xl mx-auto"
                 whileInView={{ opacity: 1, y: 0 }}
@@ -729,9 +951,42 @@ BEEN WAITING FOR."
             </section>
 
             {/* ================================================================
+                TESTIMONIALS SECTION
+                ================================================================ */}
+            <section className="w-full py-24 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="testimonials">
+              <motion.div
+                className="max-w-4xl mx-auto"
+                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 40 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className={`${spaceMono.className} text-sm font-bold mb-6 text-muted`} style={{ color: '#444444' }}>
+                  // SOCIAL PROOF
+                </div>
+                <h2 className={`${spaceMono.className} text-5xl font-bold text-white mb-16`}>Trusted by Serious Traders</h2>
+
+                <div className="relative">
+                  <AnimatePresence mode="wait">
+                    <TestimonialsCarousel />
+                  </AnimatePresence>
+
+                  {/* Navigation arrows */}
+                  <div className="flex justify-center gap-4 mt-12">
+                    <button className="text-accent hover:text-white transition" style={{ color: '#00FF94' }}>
+                      <ChevronLeft size={24} />
+                    </button>
+                    <button className="text-accent hover:text-white transition" style={{ color: '#00FF94' }}>
+                      <ChevronRight size={24} />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </section>
+
+            {/* ================================================================
                 EARLY ACCESS SECTION
                 ================================================================ */}
-            <section className="w-full py-32 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }}>
+            <section className="w-full py-32 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="pricing">
               <motion.div
                 className="max-w-2xl mx-auto text-center"
                 whileInView={{ opacity: 1, y: 0 }}
@@ -828,8 +1083,7 @@ BEEN WAITING FOR."
               </div>
             </footer>
           </>
-        )}
-      </div>
+        </div>
     </>
   );
 }
