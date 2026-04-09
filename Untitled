@@ -1,0 +1,140 @@
+Here it is:
+
+---
+
+You are building a production-grade landing page for **PolyHedge**, an alternative data intelligence company targeting stock market and prediction market traders. Build this as a single Next.js page using Tailwind CSS and Framer Motion. Use Space Mono for headlines and monospace elements, and Inter for body text — both loaded via next/font. Deploy target is Vercel.
+
+---
+
+## Intro Loading Animation
+
+On page load, render a full-screen pure black overlay (`#0A0A0A`) centered on the viewport. The text "PolyHedge" appears letter by letter in the center — each character snaps in sequentially with 110ms stagger delay, white Space Mono font, large size (~64px). After the full name is visible, pause 600ms. Then the entire overlay slides upward and off the viewport in a smooth 800ms ease-in-out wipe using Framer Motion. Once the overlay exits, remove it from the DOM. Hero content underneath begins staggered fade-up entrance animations only after the wipe transition starts. The PolyHedge logo in the navbar should trigger a single 300ms glitch effect on load — brief horizontal distortion, never repeats.
+
+---
+
+## Design System
+
+**Colors — define as Tailwind custom theme values:**
+- Background: `#0A0A0A`
+- Card: `#111111`
+- Border: `#1E1E1E`
+- Accent: `#00FF94`
+- Text primary: `#FFFFFF`
+- Text secondary: `#888888`
+- Text muted: `#444444`
+
+**Typography:**
+- Headlines: Space Mono, white, large and tight
+- Body: Inter, `#888888`
+- Labels: Space Mono, small, muted, uppercase
+
+**Layout:**
+- Max width 1200px centered with horizontal padding
+- Sections separated by generous vertical padding
+- 1px `#1E1E1E` borders on all cards
+- Border radius 4px on cards and inputs
+- Large pill border radius on CTA buttons only
+- No drop shadows anywhere — depth through border contrast only
+
+**Motion:**
+- All sections fade up on scroll entry using Framer Motion `whileInView`
+- Typewriter effect on hero headline — characters appear one by one, blinking green cursor after completion
+- Statistic numbers count up from zero when scrolled into view
+- CTA buttons show a blinking green cursor character before text on hover
+- Subtle CSS scanline texture overlay across entire page at 4% opacity
+- Faint noise grain texture on page background
+
+**UI Elements:**
+- Primary CTA: filled `#00FF94` background, black Space Mono text, large pill shape
+- Secondary CTA: dark background, `#00FF94` border, white text, large pill shape
+- Cards: `#111111` background, `1px #1E1E1E` border, `4px` radius, featured cards have `2px #00FF94` top border
+- Inputs: `#111111` background, `1px #333333` border, white Space Mono text, green cursor on focus
+- All icons: Lucide React, line style, white or `#00FF94`, 16–20px
+
+---
+
+## Page Sections — Build All of These
+
+**1. Ticker Bar**
+Full-width horizontal scrolling marquee pinned above the navbar. Pure black background, `#00FF94` Space Mono text, small font size. Scrolls left continuously using CSS animation. Content: `NYSE:AAPL SIGNAL: 0.847` — `FED RATE DECISION: 73.2% HOLD` — `FDA APPROVAL [PENDING]: 61.4%` — `SCOTUS RULING [Q2]: 58.9% AFFIRM` — `DATA SOURCES: 847 ACTIVE` — `MARKETS COVERED: ALL NYSE` — duplicate content to ensure seamless loop.
+
+**2. Navbar**
+Sticky. Pure black background. `1px #1E1E1E` bottom border. Left: "PolyHedge" in Space Mono with blinking `#00FF94` cursor character after it — this logo triggers the glitch effect on load. Right: nav links in `#888888` that brighten to white on hover, plus `> ACCESS DEMO` outlined pill button in `#00FF94`.
+
+**3. Hero**
+Full viewport height (`100vh`). Background: a slowly animated abstract visual — use a CSS or canvas-based dark geometric grid or particle field that moves slowly, stays dark (`#0A0A0A` base), subtle `#00FF94` or white grid lines at very low opacity. Do not use Three.js — keep it CSS or lightweight canvas only for performance. Centered content over background: large white Space Mono headline with typewriter effect:
+```
+THE DATA INFRASTRUCTURE
+SERIOUS TRADERS HAVE
+BEEN WAITING FOR.
+```
+Below headline, one line in `#888888` Inter:
+`Proprietary alternative data. Three collection pillars. One unified intelligence platform.`
+
+Two pill CTAs side by side: `> ACCESS DEMO →` (filled green) and `LEARN MORE` (outlined). Both use large pill border radius matching the reference screenshot aesthetic.
+
+**4. The Problem**
+Section label: `// THE PROBLEM` in small Space Mono muted uppercase. Bold white headline: `Institutional traders have Bloomberg. Everyone else has nothing.` Two short paragraphs in `#888888` Inter establishing that stock market traders have Bloomberg terminals and hundreds of alt data vendors while prediction market traders have no equivalent data infrastructure — the majority are making real-money decisions on public information alone.
+
+**5. The Platform**
+Label: `// THE PLATFORM`. Headline: `One Platform. Every Signal.` Large full-width dark panel styled as a terminal dashboard mockup — dark background, monospace labels, placeholder probability scores (e.g. `AAPL EARNINGS: 0.847 SIGNAL STRENGTH`), signal strength bars, market category tags, data source indicators. This is the hero product visual. Short description beneath: NYSE coverage plus prediction market categories, delivered via terminal-style UI, demo via CTA link.
+
+**6. Data Architecture**
+Label: `// DATA ARCHITECTURE`. Headline: `Three Pillars. Zero Overlap.` Three equal-width cards in a horizontal row. Each card: `#111111` background, `1px #1E1E1E` border, `2px #00FF94` top border, monospace number label, bold white title, `#888888` body text.
+
+- `01 — AUTONOMOUS WEB AGENTS`: Autonomous AI agents continuously monitor the internet in real time — regulatory filings, government databases, court records, academic publications, financial media, social sentiment, and job postings. Every relevant data point is captured and structured the moment it becomes available.
+- `02 — SWARM INTELLIGENCE via MIROFISH`: MiroFish is an open-source AI prediction engine and swarm intelligence platform that creates digital parallels of real-world events, simulating how they unfold across multiple scenarios. Outcomes are stress-tested using collective intelligence to produce continuously updated probability-weighted outputs.
+- `03 — PROPRIETARY MASS OUTREACH`: A homegrown outreach platform systematically contacts industry specialists, supply chain participants, and domain experts at scale — capturing ground-level intelligence that no scraper can access. The institutional-grade automated version of hedge fund channel checks.
+
+**7. Coverage**
+Label: `// COVERAGE`. Two equal columns side by side. Left column: bold white `STOCK MARKETS` header, description of full NYSE coverage with signals mapped to earnings surprises, corporate events, supply chain shifts, regulatory actions, and executive movements. Right column: bold white `PREDICTION MARKETS` header, description of niche objective non-manipulable market categories currently in selection, announcement coming soon. Behind this section at very low opacity (~8%), a slow CSS marquee of NYSE ticker symbols in `#444444` monospace scrolling horizontally — purely atmospheric.
+
+**8. Edge**
+Label: `// EDGE`. Four stat cards in a 2x2 grid. Each card: `#111111` background, `1px #1E1E1E` border, large `#00FF94` Space Mono stat value, bold white short headline, `#888888` one-sentence description.
+- `$1T` — Prediction markets approaching $1 trillion in annual volume with no Bloomberg equivalent. We are building that infrastructure.
+- `3` — Three independent proprietary data sources unified into one probability-adjusted signal.
+- `↑` — Every simulation output feeds back into the model. Accuracy compounds with every prediction.
+- `0` — No existing competitors have built alternative data infrastructure purpose-designed for prediction markets.
+
+**9. Early Access**
+Full-width section. Pure black background. Centered content. Label: `// EARLY ACCESS`. Large white Space Mono headline: `Get In Before The Edge Is Gone.` One line in `#888888`: `Onboarding our first wave of traders and institutional clients. Join the waitlist for founding member pricing.` Below: email input field and `> JOIN WAITLIST` submit button side by side. Input styled as terminal command line — `#111111` background, `1px #333333` border, Space Mono font, green blinking cursor on focus. Button is filled green pill. Wire the form to console.log on submit for now — note where to add Mailchimp or Resend API integration.
+
+**10. Footer**
+Minimal. `1px #1E1E1E` top border. Three columns: PolyHedge in Space Mono with blinking cursor left, muted tagline `// ALTERNATIVE DATA FOR SERIOUS TRADERS` center, Privacy Policy + Terms of Service links and X/LinkedIn Lucide icons right. All text in `#444444`.
+
+---
+
+## Technical Requirements
+
+- Single `page.tsx` file with all sections as individual components defined in the same file for simplicity
+- All animations via Framer Motion — use `useInView` for scroll triggers and `AnimatePresence` for the loading screen
+- Typewriter effect built with `useState` and `useEffect` — no external library
+- Number counter animation built with Framer Motion `useMotionValue` and `useSpring`
+- Ticker bar uses pure CSS `@keyframes` marquee animation — no JS
+- Background grid or particle effect uses `<canvas>` with `requestAnimationFrame` or pure CSS — no Three.js
+- Scanline overlay: a fixed `::before` pseudo-element on the body with a repeating linear gradient at 4% opacity
+- Noise grain: a fixed pseudo-element using an SVG filter or CSS background
+- No external UI component libraries — build everything from scratch with Tailwind
+- All placeholder links (`href="#"`) clearly commented for where real links go
+- Demo link opens in new tab — placeholder `href="#demo"` with comment
+- Mobile responsive — single column layout on screens below 768px, ticker and animations preserved
+- No TypeScript errors — use proper types throughout
+- Comment each major section clearly for easy navigation
+
+---
+
+Build the complete file. Do not truncate. Do not use placeholder comments instead of real code. Every section must be fully implemented.
+
+---
+
+That's your prompt. A few tips on using it:
+
+**paste it into a fresh Claude conversation** — don't use this existing chat as the context will confuse it.
+
+**If it truncates** mid-build, just reply `continue from where you left off` and it will pick up exactly where it stopped.
+
+**If a specific section looks wrong**, paste just that section's code back and say `fix this section — the issue is X`.
+
+**The one thing you'll likely need to iterate on** is the hero background canvas animation and the loading screen timing — ask it to adjust the animation duration values until it feels right.
+
+Want me to build it right now in this chat as a starting point you can then refine?
