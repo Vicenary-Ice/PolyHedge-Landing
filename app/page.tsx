@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from 'framer-motion';
-import { Mail, ExternalLink, Linkedin, Twitter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Space_Mono, Inter } from 'next/font/google';
 
 // Font imports
@@ -1060,24 +1060,6 @@ BEEN WAITING FOR."
                   </a>
                   <a href="#terms" className="text-muted hover:text-white text-sm transition" style={{ color: '#444444' }}>
                     Terms of Service
-                  </a>
-                  <a
-                    href="https://twitter.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted hover:text-accent transition"
-                    style={{ color: '#444444' }}
-                  >
-                    <Twitter size={18} />
-                  </a>
-                  <a
-                    href="https://linkedin.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted hover:text-accent transition"
-                    style={{ color: '#444444' }}
-                  >
-                    <Linkedin size={18} />
                   </a>
                 </div>
               </div>
