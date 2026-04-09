@@ -336,9 +336,6 @@ function Navbar() {
         <a href="#pricing" className="text-secondary hover:text-white transition" style={{ color: '#888888' }}>
           Pricing
         </a>
-        <a href="#docs" className="text-secondary hover:text-white transition" style={{ color: '#888888' }}>
-          Docs
-        </a>
         <motion.a
           href="#demo"
           target="_blank"
@@ -485,7 +482,7 @@ BEEN WAITING FOR."
                     className={`${spaceMono.className} px-10 py-4 rounded-full font-bold text-lg border-2`}
                     style={{ borderColor: '#00FF94', color: '#FFFFFF' }}
                   >
-                    LEARN MORE
+                    GET STARTED
                   </motion.a>
                 </motion.div>
               </motion.div>
