@@ -26,54 +26,6 @@ interface PillarCardProps {
 }
 
 // ============================================================================
-// SCROLLING FEED COMPONENT
-// ============================================================================
-
-function ScrollingFeed() {
-  const signals = [
-    { name: 'AAPL EARNINGS', value: 0.847, delta: 0.012 },
-    { name: 'FED RATE HOLD', value: 0.732, delta: 0.008 },
-    { name: 'FDA APPROVAL', value: 0.614, delta: -0.005 },
-    { name: 'SCOTUS RULING', value: 0.589, delta: 0.023 },
-    { name: 'SUPPLY CHAIN SHOCK', value: 0.421, delta: 0.034 },
-    { name: 'EARNINGS BEAT', value: 0.756, delta: 0.019 },
-    { name: 'REGULATORY FILING', value: 0.523, delta: -0.007 },
-    { name: 'EXEC RESIGNATION', value: 0.812, delta: 0.041 },
-    { name: 'PATENT APPROVED', value: 0.687, delta: 0.015 },
-  ];
-
-  const [feedItems, setFeedItems] = useState(signals.slice(0, 5));
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFeedItems((prev) => {
-        const nextSignal = signals[Math.floor(Math.random() * signals.length)];
-        return [...prev.slice(1), { ...nextSignal }];
-      });
-      setScrollY((prev) => prev + 62);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className={`${spaceMono.className} relative h-80 overflow-hidden`} style={{ backgroundColor: '#111111' }}>
-      <motion.div animate={{ y: -scrollY }} transition={{ duration: 0.5, ease: 'easeInOut' }} className="space-y-0">
-        {feedItems.map((item, idx) => (
-          <div key={idx} className="data-row-glow p-3 border-l-2 pl-4" style={{ borderColor: '#00FF94' }}>
-            <span className="text-accent text-xs" style={{ color: '#00FF94' }}>[{new Date().toLocaleTimeString()}]</span>
-            <span className="text-white text-xs ml-2">{item.name} → {item.value.toFixed(3)}</span>
-            <span className="text-accent text-xs ml-4" style={{ color: '#00FF94' }}>{item.delta >= 0 ? '↑' : '↓'} {Math.abs(item.delta).toFixed(3)}</span>
-          </div>
-        ))}
-      </motion.div>
-      <div className="absolute top-0 left-0 right-0 h-12 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #111111, transparent)' }} />
-      <div className="absolute bottom-0 left-0 right-0 h-12 pointer-events-none" style={{ background: 'linear-gradient(to top, #111111, transparent)' }} />
-    </div>
-  );
-}
-
-// ============================================================================
 // TESTIMONIALS CAROUSEL COMPONENT
 // ============================================================================
 
