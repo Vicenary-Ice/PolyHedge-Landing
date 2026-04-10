@@ -5,7 +5,6 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import { DottedSurface } from '@/components/ui/dotted-surface';
-import { cn } from '@/lib/utils';
 
 // Font imports
 const geist = Geist({ subsets: ['latin'] });
@@ -265,73 +264,6 @@ function PillarCard({ number, title, description }: PillarCardProps) {
       </p>
     </motion.div>
   );
-}
-
-// ============================================================================
-// CANVAS BACKGROUND GRID
-// ============================================================================
-
-function HeroBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size to window
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    let offset = 0;
-    let animationFrameId: number;
-
-    const animate = () => {
-      // Clear canvas
-      ctx.fillStyle = '#0A0A0A';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw grid
-      ctx.strokeStyle = 'rgba(0, 255, 148, 0.08)';
-      ctx.lineWidth = 1;
-
-      const gridSize = 50;
-      offset += 0.3;
-
-      // Horizontal lines
-      for (let y = -gridSize + (offset % gridSize); y < canvas.height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Vertical lines
-      for (let x = -gridSize + (offset % gridSize); x < canvas.width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-
-      animationFrameId = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', resizeCanvas);
-    };
-  }, []);
-
-  return <canvas ref={canvasRef} className="absolute inset-0" />;
 }
 
 // ============================================================================

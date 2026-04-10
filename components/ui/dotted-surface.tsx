@@ -64,7 +64,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 		camera.updateProjectionMatrix();
 
 		// Create particles
-		const particles: THREE.Points[] = [];
 		const positions: number[] = [];
 		const colors: number[] = [];
 
