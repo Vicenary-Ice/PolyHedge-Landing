@@ -5,6 +5,7 @@ import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import { DottedSurface } from '@/components/ui/dotted-surface';
+import { useEmailSignup } from '@/lib/hooks/useEmailSignup';
 
 // Font imports
 const geist = Geist({ subsets: ['latin'] });
@@ -263,6 +264,60 @@ function PillarCard({ number, title, description }: PillarCardProps) {
         {description}
       </p>
     </motion.div>
+  );
+}
+
+// ============================================================================
+// WAITLIST FORM COMPONENT
+// ============================================================================
+
+function WaitlistForm() {
+  const [email, setEmail] = useState('');
+  const { signup, loading, error, success } = useEmailSignup();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await signup(email);
+    if (result) {
+      setEmail('');
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col md:flex-row gap-4 justify-center items-center"
+    >
+      <input
+        type="email"
+        placeholder="> your@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        disabled={loading}
+        className={`${geist.className} flex-1 md:flex-none px-6 py-4 rounded bg-card border-2 text-white placeholder-muted focus:outline-none focus:border-accent disabled:opacity-50`}
+        style={{
+          backgroundColor: '#111111',
+          borderColor: error ? '#FF6B6B' : '#333333',
+          color: '#FFFFFF',
+        }}
+      />
+      <motion.button
+        type="submit"
+        whileHover={{ scale: 1.05 }}
+        disabled={loading}
+        className={`${geist.className} px-8 py-4 rounded-full font-bold text-lg disabled:opacity-50`}
+        style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}
+      >
+        {loading ? '> LOADING...' : '> JOIN WAITLIST'}
+      </motion.button>
+      {error && (
+        <p className="text-red-500 text-sm w-full md:w-auto">{error}</p>
+      )}
+      {success && (
+        <p className="text-green-500 text-sm w-full md:w-auto">Thanks for signing up!</p>
+      )}
+    </form>
   );
 }
 
@@ -862,37 +917,7 @@ BEEN WAITING FOR."
                   Onboarding our first wave of traders and institutional clients. Join the waitlist for founding member pricing.
                 </p>
 
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const email = ((e.target as HTMLFormElement).querySelector('input[type="email"]') as HTMLInputElement)?.value;
-                    console.log('Waitlist submission:', email);
-                    // TODO: Integrate with Mailchimp or Resend API
-                    alert('Thanks! Check your email for next steps.');
-                    (e.target as HTMLFormElement).reset();
-                  }}
-                  className="flex flex-col md:flex-row gap-4 justify-center items-center"
-                >
-                  <input
-                    type="email"
-                    placeholder="> your@email.com"
-                    required
-                    className={`${geist.className} flex-1 md:flex-none px-6 py-4 rounded bg-card border-2 text-white placeholder-muted focus:outline-none focus:border-accent`}
-                    style={{
-                      backgroundColor: '#111111',
-                      borderColor: '#333333',
-                      color: '#FFFFFF',
-                    }}
-                  />
-                  <motion.button
-                    type="submit"
-                    whileHover={{ scale: 1.05 }}
-                    className={`${geist.className} px-8 py-4 rounded-full font-bold text-lg`}
-                    style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}
-                  >
-                    &gt; JOIN WAITLIST
-                  </motion.button>
-                </form>
+                <WaitlistForm />
               </motion.div>
             </section>
 
