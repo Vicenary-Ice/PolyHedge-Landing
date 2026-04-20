@@ -92,9 +92,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling */
+/* Scrollbar — thin hairline */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -102,24 +102,24 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00FF94;
-  border-radius: 4px;
+  background: #1F1F1F;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00CC76;
+  background: #2A2A2A;
 }
 
-/* Global focus styles */
+/* Focus — subtle ring, not outline bar */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 2px solid #00FF94;
+  outline: 1px solid #00FF94;
   outline-offset: 2px;
 }
 
-/* Selection color */
+/* Selection */
 ::selection {
-  background-color: #00FF94;
-  color: #0A0A0A;
+  background-color: rgba(0, 255, 148, 0.25);
+  color: #FAFAFA;
 }
