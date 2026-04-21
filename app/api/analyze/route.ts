@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchPolymarketContext } from '@/lib/prediction-feeds';
+import { synthesizeForensicContext } from '@/lib/forensics';
 
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
 const MODEL = 'meta/llama-3.1-8b-instruct';
@@ -82,6 +83,9 @@ export async function POST(request: NextRequest) {
          MANDATORY: Name the market you are using (e.g. "Utilizing odds for: [Market Name]").
          If no relevant market exists in the feed, state "NO LIVE MARKET DETECTED" and use a 50% synthetic baseline for comparison.
          
+         ### [FORENSIC_INTELLIGENCE]
+         Using the provided FORENSIC_CALIBRATION_SIGNALS, analyze the reliability of the current market odds. State the ECE (Expected Calibration Error) and provide a verdict on "Calibration Health".
+         
          ### [PROBABILISTIC_PIVOT_DECAY]
          Forensic breakdown of outcome trees and time-decay variance for "${topic}".
          
@@ -97,12 +101,14 @@ export async function POST(request: NextRequest) {
          RISK: 42
          HEAT: 88
          EDGE: [The absolute difference between Forensic Prob and Market Consensus]
+         CALIBRATION: [The calibration score from forensic signals]
          VOLATILITY: 20
          CHART: [20, 25, 30, 45, 50, 65, 75, 80]
          </ANALYSIS_METADATA>
 
          REQUIRED METADATA BLOCK:
          The EDGE value in <ANALYSIS_METADATA> must be the raw integer of your WEDGE_MAGNITUDE calculation.
+         The CALIBRATION value must be the integer from the FORENSIC_CALIBRATION_SIGNALS.
          CHART values should represent the PROBABILITY MOMENTUM PATH.`;
 
     let finalPrompt = systemPrompt;
@@ -110,13 +116,14 @@ export async function POST(request: NextRequest) {
     // --- LIVE FEED INTEGRATION ---
     if (type === 'prediction') {
       console.log(`[${requestId}] Fetching live prediction feeds for: ${topic}`);
+      const marketsRes = await fetch(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=10&order=volume&dir=desc&term=${encodeURIComponent(topic)}`);
+      const markets = marketsRes.ok ? await marketsRes.json() : [];
+      
       const liveContext = await fetchPolymarketContext(topic);
-      if (liveContext) {
-        console.log(`[${requestId}] Live context acquired. Grounding model.`);
-        finalPrompt = `${systemPrompt}\n\n${liveContext}\n\nCURRENT DATE: April 2026`;
-      } else {
-        finalPrompt = `${systemPrompt}\n\nCURRENT DATE: April 2026`;
-      }
+      const forensicContext = synthesizeForensicContext(markets);
+      
+      console.log(`[${requestId}] Live context and forensics acquired.`);
+      finalPrompt = `${systemPrompt}\n\n${liveContext}\n\n${forensicContext}\n\nCURRENT DATE: April 2026`;
     } else {
       finalPrompt = `${systemPrompt}\n\nCURRENT DATE: April 2026`;
     }

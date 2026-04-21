@@ -481,6 +481,15 @@ BEEN WAITING FOR."
                     </div>
                     <div className="border-l-2 pl-4" style={{ borderColor: '#00FF94' }}>
                       <div className="text-accent text-xs mb-2" style={{ color: '#00FF94' }}>
+                        CALIBRATION HEALTH
+                      </div>
+                      <div className="text-white text-2xl font-bold mb-2">98.2%</div>
+                      <div className="text-muted text-xs" style={{ color: '#FFFFFF' }}>
+                        ECE ESTIMATE: 0.2% [RELIABLE]
+                      </div>
+                    </div>
+                    <div className="border-l-2 pl-4" style={{ borderColor: '#00FF94' }}>
+                      <div className="text-accent text-xs mb-2" style={{ color: '#00FF94' }}>
                         FDA APPROVAL
                       </div>
                       <div className="text-white text-2xl font-bold mb-2">0.614</div>

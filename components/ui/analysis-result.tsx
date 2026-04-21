@@ -79,6 +79,7 @@ export function AnalysisResult({ analysis, type }: AnalysisResultProps) {
   const volatility = extractMetric('Volatility');
   const institutionalFlow = extractMetric('Flow') || extractMetric('Institutional_Flow') || extractMetric('Social_Heat') || extractMetric('Simulation_Confidence') || extractMetric('Confidence');
   const edge = extractMetric('Edge');
+  const calibration = extractMetric('Calibration');
   const chartData = extractChartData();
 
   const confidenceMatch = analysis.match(/Confidence Score:\s*(\d+)%?/i) || analysis.match(/CONFIDENCE:\s*(\d+)%?/i) || analysis.match(/CONFIDENCE_RATING:\s*(\d+)%?/i);
@@ -186,6 +187,9 @@ export function AnalysisResult({ analysis, type }: AnalysisResultProps) {
                     <ProgressBar label={type === 'stock' ? "Expert Signal Weight" : "Swarm Signal Weight"} percentage={expertSignal} />
                     <ProgressBar label={type === 'stock' ? "Institutional Buy Flow" : "Social Sentiment Heat"} percentage={institutionalFlow || 65} />
                     <ProgressBar label={type === 'stock' ? "Algorithmic Confidence" : "Forecast Confidence"} percentage={parseInt(confidence)} />
+                    {type === 'prediction' && calibration > 0 && (
+                      <ProgressBar label="Calibration Reliability" percentage={calibration} color="#00FF94" />
+                    )}
                   </div>
 
                   <div className="pt-6 border-t border-border/30" style={{ borderColor: 'rgba(30, 30, 30, 0.3)' }}>
