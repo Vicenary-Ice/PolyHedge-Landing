@@ -2,10 +2,13 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExternalLink, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import { DottedSurface } from '@/components/ui/dotted-surface';
-import { useEmailSignup } from '@/lib/hooks/useEmailSignup';
+import { FloatingParticles } from '@/components/background-effects';
+import { TickerBar, Navbar } from '@/components/navigation';
+import { WaitlistForm } from '@/components/waitlist-form';
+import Link from 'next/link';
 
 // Font imports
 const geist = Geist({ subsets: ['latin'] });
@@ -39,7 +42,7 @@ function TestimonialsCarousel() {
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
   useEffect(() => {
-    const interval = setInterval(() => setCurrentIndex((prev) => (prev + 1) % testimonials.length), 4000);
+    const interval = setInterval(() => setCurrentIndex((prev: number) => (prev + 1) % testimonials.length), 4000);
     return () => clearInterval(interval);
   }, [testimonials.length]);
   const current = testimonials[currentIndex];
@@ -54,53 +57,6 @@ function TestimonialsCarousel() {
   );
 }
 
-// ============================================================================
-// FLOATING PARTICLES COMPONENT
-// ============================================================================
-
-function FloatingParticles() {
-  const particles = Array.from({ length: 18 }).map((_, i) => ({
-    id: i,
-    startX: Math.random() * 100,
-    startY: Math.random() * 100,
-    size: Math.random() * 2 + 2,
-    duration: Math.random() * 15 + 15,
-    delay: Math.random() * 5,
-    color: Math.random() > 0.5 ? '#FFFFFF' : '#00FF94',
-    opacity: Math.random() * 0.2 + 0.2,
-  }));
-
-  return (
-    <>
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            left: `${particle.startX}%`,
-            top: `${particle.startY}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-            backgroundColor: particle.color,
-            opacity: particle.opacity,
-            zIndex: 5,
-          }}
-          animate={{
-            y: [-100, 100],
-            x: [0, Math.random() * 20 - 10],
-          }}
-          transition={{
-            duration: particle.duration,
-            delay: particle.delay,
-            repeat: Infinity,
-            repeatType: 'loop',
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </>
-  );
-}
 
 // ============================================================================
 // LOADING OVERLAY COMPONENT
@@ -151,30 +107,6 @@ function LoadingOverlay({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-// ============================================================================
-// GLITCH EFFECT FOR LOGO
-// ============================================================================
-
-function GlitchLogo() {
-  const [isGlitching, setIsGlitching] = useState(false);
-
-  useEffect(() => {
-    // Trigger glitch on mount only
-    setIsGlitching(true);
-    const timer = setTimeout(() => setIsGlitching(false), 300);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <motion.div
-      animate={isGlitching ? { x: [-4, 4, -4, 0] } : { x: 0 }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className={`${geist.className} font-bold text-white text-lg`}
-    >
-      PolyHedge<span className="text-accent">_</span>
-    </motion.div>
-  );
-}
 
 // ============================================================================
 // TYPEWRITER HEADLINE
@@ -267,154 +199,8 @@ function PillarCard({ number, title, description }: PillarCardProps) {
   );
 }
 
-// ============================================================================
-// WAITLIST FORM COMPONENT
-// ============================================================================
 
-function WaitlistForm() {
-  const [email, setEmail] = useState('');
-  const { signup, loading, error, success } = useEmailSignup();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const result = await signup(email);
-    if (result) {
-      setEmail('');
-    }
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col md:flex-row gap-4 justify-center items-center"
-    >
-      <input
-        type="email"
-        placeholder="> your@email.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        disabled={loading}
-        className={`${geist.className} flex-1 md:flex-none px-6 py-4 rounded bg-card border-2 text-white placeholder-muted focus:outline-none focus:border-accent disabled:opacity-50`}
-        style={{
-          backgroundColor: '#111111',
-          borderColor: error ? '#FF6B6B' : '#333333',
-          color: '#FFFFFF',
-        }}
-      />
-      <motion.button
-        type="submit"
-        whileHover={{ scale: 1.05 }}
-        disabled={loading}
-        className={`${geist.className} px-8 py-4 rounded-full font-bold text-lg disabled:opacity-50`}
-        style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}
-      >
-        {loading ? '> LOADING...' : '> JOIN WAITLIST'}
-      </motion.button>
-      {error && (
-        <p className="text-red-500 text-sm w-full md:w-auto">{error}</p>
-      )}
-      {success && (
-        <p className="text-green-500 text-sm w-full md:w-auto">Thanks for signing up!</p>
-      )}
-    </form>
-  );
-}
-
-// ============================================================================
-// TICKER BAR COMPONENT
-// ============================================================================
-
-function TickerBar() {
-  const tickerContent = `NYSE:AAPL SIGNAL: 0.847   •   FED RATE DECISION: 73.2% HOLD   •   FDA APPROVAL [PENDING]: 61.4%   •   SCOTUS RULING [Q2]: 58.9% AFFIRM   •   DATA SOURCES: 847 ACTIVE   •   MARKETS COVERED: ALL NYSE`;
-
-  return (
-    <div
-      className={`${geist.className} fixed top-0 left-0 right-0 z-40 w-full overflow-hidden bg-black border-b`}
-      style={{ backgroundColor: '#0A0A0A', borderColor: '#1E1E1E' }}
-    >
-      <style>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-
-        .ticker-content {
-          animation: marquee 30s linear infinite;
-          white-space: nowrap;
-        }
-      `}</style>
-      <div className="ticker-content text-sm py-2 px-4" style={{ color: '#00FF94' }}>
-        {tickerContent}   •   {tickerContent}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// NAVBAR COMPONENT
-// ============================================================================
-
-function Navbar({ activeSection }: { activeSection: string }) {
-  return (
-    <nav
-      className={`fixed top-12 left-0 right-0 z-30 bg-black border-b flex items-center justify-between px-8 py-4`}
-      style={{ backgroundColor: '#0A0A0A', borderColor: '#1E1E1E' }}
-    >
-      <GlitchLogo />
-      <div className="flex items-center gap-8">
-        <a
-          href="#features"
-          className="nav-link transition"
-          style={{
-            color: activeSection === 'features' ? '#FFFFFF' : '#888888',
-            borderBottom: activeSection === 'features' ? '2px solid #00FF94' : 'none',
-            paddingBottom: '2px',
-          }}
-        >
-          Features
-        </a>
-        <a
-          href="#coverage"
-          className="nav-link transition"
-          style={{
-            color: activeSection === 'coverage' ? '#FFFFFF' : '#888888',
-            borderBottom: activeSection === 'coverage' ? '2px solid #00FF94' : 'none',
-            paddingBottom: '2px',
-          }}
-        >
-          Coverage
-        </a>
-        <a
-          href="#pricing"
-          className="nav-link transition"
-          style={{
-            color: activeSection === 'pricing' ? '#FFFFFF' : '#888888',
-            borderBottom: activeSection === 'pricing' ? '2px solid #00FF94' : 'none',
-            paddingBottom: '2px',
-          }}
-        >
-          Pricing
-        </a>
-        <motion.a
-          href="#demo"
-          target="_blank"
-          rel="noopener noreferrer"
-          whileHover={{ scale: 1.05 }}
-          className={`${geist.className} px-6 py-2 border-2 rounded-full text-black font-bold text-sm flex items-center gap-2`}
-          style={{ borderColor: '#00FF94', color: '#0A0A0A', backgroundColor: '#00FF94' }}
-        >
-          &gt; ACCESS DEMO
-          <ExternalLink size={14} />
-        </motion.a>
-      </div>
-    </nav>
-  );
-}
 
 // ============================================================================
 // MAIN PAGE COMPONENT
@@ -604,24 +390,20 @@ BEEN WAITING FOR."
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.7, duration: 0.6 }}
                 >
-                  <motion.a
-                    href="#demo"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.05 }}
-                    className={`${geist.className} px-10 py-4 rounded-full font-bold text-lg flex items-center gap-2`}
+                  <Link 
+                    href="/pricing"
+                    className={`${geist.className} px-10 py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 glow-btn`}
                     style={{ backgroundColor: '#00FF94', color: '#0A0A0A' }}
                   >
-                    &gt; ACCESS DEMO →
-                  </motion.a>
-                  <motion.a
-                    href="#features"
-                    whileHover={{ scale: 1.05 }}
-                    className={`${geist.className} px-10 py-4 rounded-full font-bold text-lg border-2`}
+                    &gt; GET ACCESS →
+                  </Link>
+                  <Link 
+                    href="/pricing"
+                    className={`${geist.className} px-10 py-4 rounded-full font-bold text-lg border-2 flex items-center justify-center glow-btn`}
                     style={{ borderColor: '#00FF94', color: '#FFFFFF' }}
                   >
-                    GET STARTED
-                  </motion.a>
+                    VIEW PLANS
+                  </Link>
                 </motion.div>
               </motion.div>
             </section>
@@ -900,7 +682,7 @@ BEEN WAITING FOR."
             </section>
 
             {/* ================================================================
-                EARLY ACCESS SECTION
+                TRIAL ACCESS SECTION
                 ================================================================ */}
             <section className="w-full py-32 px-8 bg-black" style={{ backgroundColor: '#0A0A0A' }} data-section id="pricing">
               <motion.div
@@ -910,14 +692,21 @@ BEEN WAITING FOR."
                 transition={{ duration: 0.6 }}
               >
                 <div className={`${geist.className} text-sm font-bold mb-8 text-muted`} style={{ color: '#FFFFFF' }}>
-                  // EARLY ACCESS
+                  // IMMEDIATE ACCESS
                 </div>
-                <h2 className={`${geist.className} text-5xl font-bold text-white mb-6`}>Get In Before The Edge Is Gone.</h2>
+                <h2 className={`${geist.className} text-5xl font-bold text-white mb-6`}>Deploy Your Edge in Seconds.</h2>
                 <p className="text-secondary text-lg mb-12" style={{ color: '#FFFFFF' }}>
-                  Onboarding our first wave of traders and institutional clients. Join the waitlist for founding member pricing.
+                  No more waiting. Access our terminal today and get 3 complimentary institutional searches.
                 </p>
 
-                <WaitlistForm />
+                <motion.a 
+                  href="/demo"
+                  whileHover={{ scale: 1.05 }}
+                  className={`${geist.className} inline-flex items-center gap-2 px-10 py-5 bg-[#00FF94] text-[#0A0A0A] rounded-full font-bold text-lg group`}
+                >
+                  START FREE TRIAL
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </motion.a>
               </motion.div>
             </section>
 
@@ -941,12 +730,12 @@ BEEN WAITING FOR."
 
                 {/* Right: Links and Social */}
                 <div className="flex gap-6 items-center justify-end flex-wrap">
-                  <a href="#privacy" className="text-muted hover:text-white text-sm transition" style={{ color: '#FFFFFF' }}>
+                  <Link href="/privacy" className="text-muted hover:text-white text-sm transition" style={{ color: '#FFFFFF' }}>
                     Privacy Policy
-                  </a>
-                  <a href="#terms" className="text-muted hover:text-white text-sm transition" style={{ color: '#FFFFFF' }}>
+                  </Link>
+                  <Link href="/terms" className="text-muted hover:text-white text-sm transition" style={{ color: '#FFFFFF' }}>
                     Terms of Service
-                  </a>
+                  </Link>
                 </div>
               </div>
             </footer>
