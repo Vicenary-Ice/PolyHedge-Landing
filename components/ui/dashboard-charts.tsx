@@ -99,22 +99,23 @@ export function MetricBox({ label, value, subValue, trend }: MetricBoxProps) {
 interface ProgressBarProps {
   label: string;
   percentage: number;
+  color?: string;
 }
 
-export function ProgressBar({ label, percentage }: ProgressBarProps) {
+export function ProgressBar({ label, percentage, color = '#00FF94' }: ProgressBarProps) {
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-[10px] font-mono tracking-widest" style={{ color: '#888888' }}>
         <span>{label.toUpperCase()}</span>
-        <span className="text-accent" style={{ color: '#00FF94' }}>{percentage}%</span>
+        <span className="text-accent" style={{ color: color }}>{percentage}%</span>
       </div>
       <div className="h-1 bg-muted/20 w-full rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(68, 68, 68, 0.2)' }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className="h-full bg-accent"
-          style={{ backgroundColor: '#00FF94' }}
+          className="h-full"
+          style={{ backgroundColor: color }}
         />
       </div>
     </div>
