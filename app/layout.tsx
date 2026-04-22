@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { PostHogProvider } from "./providers";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"] });
@@ -20,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={geist.className}>
       <body style={{ backgroundColor: "#0A0A0A", color: "#FFFFFF" }}>
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>
   );
