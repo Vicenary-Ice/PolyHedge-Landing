@@ -21,8 +21,8 @@ export function AnalysisResult({ analysis, type }: AnalysisResultProps) {
   // Parsing logic for dashboard data
   const extractMetric = (key: string) => {
     // 1. Try new XML-style block first
-    const xmlMatch = analysis.match(/<ANALYSIS_METADATA>([\s\S]*?)<\/ANALYSIS_METADATA>/i) || 
-                     analysis.match(/ANALYSIS_METADATA([\s\S]*?)$/i);
+    const xmlMatch = analysis.match(/<ANALYSIS_METADATA>([\s\S]*?)<\/ANALYSIS_METADATA>/i) ||
+      analysis.match(/ANALYSIS_METADATA([\s\S]*?)$/i);
     if (xmlMatch) {
       const block = xmlMatch[1];
       const metricMatch = block.match(new RegExp(`${key}:\\s*(\\d+)`, 'i'));
@@ -37,14 +37,14 @@ export function AnalysisResult({ analysis, type }: AnalysisResultProps) {
   const extractChartData = () => {
     // 1. Try XML-style or plain text block
     const xmlMatch = analysis.match(/<ANALYSIS_METADATA>([\s\S]*?)<\/ANALYSIS_METADATA>/i) ||
-                     analysis.match(/ANALYSIS_METADATA([\s\S]*?)$/i);
+      analysis.match(/ANALYSIS_METADATA([\s\S]*?)$/i);
     if (xmlMatch) {
       const block = xmlMatch[1];
       const chartMatch = block.match(/CHART:\s*\[(.*?)\]/i);
       if (chartMatch) {
         try {
           return chartMatch[1].split(',').map(n => parseInt(n.trim()));
-        } catch (e) {}
+        } catch (e) { }
       }
     }
 
@@ -113,20 +113,19 @@ export function AnalysisResult({ analysis, type }: AnalysisResultProps) {
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <div className={`px-4 py-1.5 rounded-sm border font-mono text-[11px] font-bold tracking-widest ${
-              advisory === 'LONG YES' || isValueWedge || isPositive ? 'border-accent text-accent' : 
-              advisory === 'LONG NO' || isAsymmetricRisk || isNegative ? 'border-red-500 text-red-500' : 
-              'border-blue-400 text-blue-400'
-            }`} style={{ 
-              borderColor: (advisory === 'LONG YES' || isValueWedge || isPositive) ? '#00FF94' : undefined, 
-              color: (advisory === 'LONG YES' || isValueWedge || isPositive) ? '#00FF94' : undefined, 
-              backgroundColor: (advisory === 'LONG YES' || isValueWedge || isPositive) ? 'rgba(0, 255, 148, 0.05)' : undefined 
-            }}>
-              {advisory ? `ADVISORY: ${advisory}` : 
-               isValueWedge ? 'SIGNAL: VALUE WEDGE' : 
-               isAsymmetricRisk ? 'SIGNAL: ASYMMETRIC RISK' : 
-               isFairValue ? 'SIGNAL: FAIR VALUE' :
-               isPositive ? 'SIGNAL: POSITIVE' : isNegative ? 'SIGNAL: CAUTION' : 'SIGNAL: NEUTRAL'}
+            <div className={`px-4 py-1.5 rounded-sm border font-mono text-[11px] font-bold tracking-widest ${advisory === 'LONG YES' || isValueWedge || isPositive ? 'border-accent text-accent' :
+              advisory === 'LONG NO' || isAsymmetricRisk || isNegative ? 'border-red-500 text-red-500' :
+                'border-blue-400 text-blue-400'
+              }`} style={{
+                borderColor: (advisory === 'LONG YES' || isValueWedge || isPositive) ? '#00FF94' : undefined,
+                color: (advisory === 'LONG YES' || isValueWedge || isPositive) ? '#00FF94' : undefined,
+                backgroundColor: (advisory === 'LONG YES' || isValueWedge || isPositive) ? 'rgba(0, 255, 148, 0.05)' : undefined
+              }}>
+              {advisory ? `ADVISORY: ${advisory}` :
+                isValueWedge ? 'SIGNAL: VALUE WEDGE' :
+                  isAsymmetricRisk ? 'SIGNAL: ASYMMETRIC RISK' :
+                    isFairValue ? 'SIGNAL: FAIR VALUE' :
+                      isPositive ? 'SIGNAL: POSITIVE' : isNegative ? 'SIGNAL: CAUTION' : 'SIGNAL: NEUTRAL'}
             </div>
             <div className="hidden md:block text-muted text-xs font-mono" style={{ color: '#444444' }}>
               SERIAL: {serial}
@@ -176,30 +175,30 @@ export function AnalysisResult({ analysis, type }: AnalysisResultProps) {
                 <div className="flex items-center gap-2 mb-6 text-accent font-bold text-xs tracking-[0.2em]" style={{ color: '#00FF94' }}>
                   <Activity size={16} /> {type === 'stock' ? 'QUANT VECTORS' : 'SWARM VECTORS'}
                 </div>
-                  <div>
-                    <div className="text-[10px] text-muted font-mono uppercase mb-4" style={{ color: '#888888' }}>
-                      {type === 'stock' ? 'PROJECTION PATH // PRICE DISCOVERY' : 'PROBABILITY CURVE // SWARM MOMENTUM'}
-                    </div>
-                    <HighFidelityProjection data={chartData} />
+                <div>
+                  <div className="text-[10px] text-muted font-mono uppercase mb-4" style={{ color: '#888888' }}>
+                    {type === 'stock' ? 'PROJECTION PATH // PRICE DISCOVERY' : 'PROBABILITY CURVE // SWARM MOMENTUM'}
                   </div>
-                  
-                  <div className="space-y-4 pt-4">
-                    <ProgressBar label={type === 'stock' ? "Expert Signal Weight" : "Swarm Signal Weight"} percentage={expertSignal} />
-                    <ProgressBar label={type === 'stock' ? "Institutional Buy Flow" : "Social Sentiment Heat"} percentage={institutionalFlow || 65} />
-                    <ProgressBar label={type === 'stock' ? "Algorithmic Confidence" : "Forecast Confidence"} percentage={parseInt(confidence)} />
-                    {type === 'prediction' && calibration > 0 && (
-                      <ProgressBar label="Calibration Reliability" percentage={calibration} color="#00FF94" />
-                    )}
-                  </div>
+                  <HighFidelityProjection data={chartData} />
+                </div>
 
-                  <div className="pt-6 border-t border-border/30" style={{ borderColor: 'rgba(30, 30, 30, 0.3)' }}>
-                    <div className="flex items-center gap-3 p-4 bg-accent/5 rounded border border-accent/10" style={{ backgroundColor: 'rgba(0, 255, 148, 0.05)', borderColor: 'rgba(0, 255, 148, 0.1)' }}>
-                      <Zap className="text-accent animate-pulse" size={18} style={{ color: '#00FF94' }} />
-                      <div className="text-[10px] font-mono leading-tight text-secondary">
-                        <span className="text-accent font-bold block" style={{ color: '#00FF94' }}>AI CORE ACTIVE</span>
-                        Real-time synthesis online. No MNPI detected.
-                      </div>
+                <div className="space-y-4 pt-4">
+                  <ProgressBar label={type === 'stock' ? "Expert Signal Weight" : "Swarm Signal Weight"} percentage={expertSignal} />
+                  <ProgressBar label={type === 'stock' ? "Institutional Buy Flow" : "Social Sentiment Heat"} percentage={institutionalFlow || 65} />
+                  <ProgressBar label={type === 'stock' ? "Algorithmic Confidence" : "Forecast Confidence"} percentage={parseInt(confidence)} />
+                  {type === 'prediction' && calibration > 0 && (
+                    <ProgressBar label="Calibration Reliability" percentage={calibration} color="#00FF94" />
+                  )}
+                </div>
+
+                <div className="pt-6 border-t border-border/30" style={{ borderColor: 'rgba(30, 30, 30, 0.3)' }}>
+                  <div className="flex items-center gap-3 p-4 bg-accent/5 rounded border border-accent/10" style={{ backgroundColor: 'rgba(0, 255, 148, 0.05)', borderColor: 'rgba(0, 255, 148, 0.1)' }}>
+                    <Zap className="text-accent animate-pulse" size={18} style={{ color: '#00FF94' }} />
+                    <div className="text-[10px] font-mono leading-tight text-secondary">
+                      <span className="text-accent font-bold block" style={{ color: '#00FF94' }}>AI CORE ACTIVE</span>
+                      Real-time synthesis online. No MNPI detected.
                     </div>
+                  </div>
                 </div>
               </div>
             </div>
