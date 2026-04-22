@@ -26,7 +26,7 @@ export function GlitchLogo() {
   }, []);
 
   // Secret reset functionality: 5 clicks resets searches
-  const handleLogoClick = (e: React.MouseEvent) => {
+  const handleLogoClick = (_e: React.MouseEvent) => {
     const newCount = clickCount + 1;
     setClickCount(newCount);
     
@@ -124,9 +124,7 @@ export function Navbar({ activeSection }: { activeSection?: string }) {
             );
         })}
         <motion.a
-          href="/demo"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/auth?intent=demo"
           whileHover={{ scale: 1.05 }}
           className={`${geist.className} px-6 py-2 border-2 rounded-full text-black font-bold text-sm flex items-center gap-2`}
           style={{ borderColor: '#00FF94', color: '#0A0A0A', backgroundColor: '#00FF94' }}

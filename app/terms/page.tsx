@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { FileText, ArrowLeft } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import Link from 'next/link';

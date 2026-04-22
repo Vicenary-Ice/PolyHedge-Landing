@@ -3,8 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -126,7 +124,7 @@ interface HighFidelityProjectionProps {
   label?: string;
 }
 
-export function HighFidelityProjection({ data, label }: HighFidelityProjectionProps) {
+export function HighFidelityProjection({ data, label: _label }: HighFidelityProjectionProps) {
   if (!data || data.length === 0) return null;
 
   // Transform raw array into recharts-ready object array

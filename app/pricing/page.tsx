@@ -8,6 +8,7 @@ import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { TickerBar, Navbar } from '@/components/navigation';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -30,6 +31,7 @@ function PricingCard({ name, price, description, features, recommended, icon }: 
   const handleCheckout = async () => {
     try {
       setLoading(true);
+      posthog.capture('checkout_initiated', { plan_name: name, price_usd: Number(price) });
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

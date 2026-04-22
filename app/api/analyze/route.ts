@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchPolymarketContext } from '@/lib/prediction-feeds';
 import { synthesizeForensicContext } from '@/lib/forensics';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
 const MODEL = 'meta/llama-3.1-8b-instruct';
@@ -16,6 +17,14 @@ export async function POST(request: NextRequest) {
     if (!topic || !type) {
       return NextResponse.json({ error: 'Topic and type are required' }, { status: 400 });
     }
+
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: requestId,
+      event: 'analysis_requested',
+      properties: { topic, type, request_id: requestId },
+    });
+    await posthog.flush();
 
     if (!NVIDIA_API_KEY) {
       console.error(`[${requestId}] NVIDIA_API_KEY is not configured`);

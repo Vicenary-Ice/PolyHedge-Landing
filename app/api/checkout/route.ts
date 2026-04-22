@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 export async function POST(req: Request) {
   try {
@@ -31,6 +32,14 @@ export async function POST(req: Request) {
     });
 
     if (!session.url) throw new Error('No session URL returned from Stripe');
+
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId: session.id,
+      event: 'checkout_session_created',
+      properties: { plan_name: planName, price_usd: amount, stripe_session_id: session.id },
+    });
+    await posthog.flush();
 
     return NextResponse.json({ url: session.url });
   } catch (err: any) {

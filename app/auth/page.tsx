@@ -9,6 +9,7 @@ import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { GlitchLogo } from '@/components/navigation';
 import { TIER_STORAGE_KEY } from '@/lib/constants/tiers';
+import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -17,6 +18,7 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [activatedPlan, setActivatedPlan] = useState<string | null>(null);
+  const [emailValue, setEmailValue] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -40,13 +42,22 @@ export default function AuthPage() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    posthog.capture('auth_form_submitted', { mode });
+    if (emailValue) {
+      posthog.identify(emailValue, { email: emailValue });
+    }
     setIsLoading(true);
-    
+
     // Simulate auth processing
     await new Promise(r => setTimeout(r, 2000));
-    
-    // In this mock, we always redirect to pricing to facilitate the flow
-    router.push('/pricing');
+
+    const intent = searchParams.get('intent');
+    if (intent === 'demo') {
+      localStorage.setItem(TIER_STORAGE_KEY, 'Observer');
+      router.push('/demo');
+    } else {
+      router.push('/pricing');
+    }
   };
 
   return (
@@ -128,6 +139,8 @@ export default function AuthPage() {
               type="email"
               placeholder="operator@email.com"
               required
+              value={emailValue}
+              onChange={(e) => setEmailValue(e.target.value)}
               className="w-full bg-[#111111] border-2 border-[#1E1E1E] rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-[#00FF94] transition-colors"
             />
           </div>
@@ -170,8 +183,12 @@ export default function AuthPage() {
         </form>
 
         <div className="mt-8 text-center">
-          <button 
-            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+          <button
+            onClick={() => {
+              const next = mode === 'login' ? 'signup' : 'login';
+              posthog.capture('auth_mode_switched', { from: mode, to: next });
+              setMode(next);
+            }}
             className="text-[#888888] hover:text-white transition-colors text-sm"
           >
             {mode === 'signup' 

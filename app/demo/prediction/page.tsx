@@ -18,7 +18,7 @@ export default function PredictionSearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [showOverlay, setShowOverlay] = useState(false);
-  const { searchCount, maxSearches, tierName, incrementSearch, isInitialized, resetSearches } = useSearchLimit();
+  const { searchCount, maxSearches, tierName, incrementSearch, isInitialized } = useSearchLimit();
 
   const addLog = (msg: string) => {
     setLogs((prev: string[]) => [...prev.slice(-4), `> ${msg}`]);

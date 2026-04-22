@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, BarChart2, ArrowRight } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import Link from 'next/link';
+import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -31,7 +32,7 @@ export default function DemoPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Stock Markets Option */}
-          <Link href="/demo/stocks" className="group">
+          <Link href="/demo/stocks" className="group" onClick={() => posthog.capture('demo_environment_selected', { environment: 'stocks' })}>
             <motion.div 
               whileHover={{ scale: 1.02, borderColor: '#00FF94' }}
               className="bg-card border-2 border-border p-12 rounded-lg text-left transition-all relative overflow-hidden h-full flex flex-col justify-between"
@@ -54,7 +55,7 @@ export default function DemoPage() {
           </Link>
 
           {/* Prediction Markets Option */}
-          <Link href="/demo/prediction" className="group">
+          <Link href="/demo/prediction" className="group" onClick={() => posthog.capture('demo_environment_selected', { environment: 'prediction' })}>
             <motion.div 
               whileHover={{ scale: 1.02, borderColor: '#00FF94' }}
               className="bg-card border-2 border-border p-12 rounded-lg text-left transition-all relative overflow-hidden h-full flex flex-col justify-between"

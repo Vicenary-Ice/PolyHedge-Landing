@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Geist } from 'next/font/google';
 import { useEmailSignup } from '@/lib/hooks/useEmailSignup';
+import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -13,6 +14,8 @@ export function WaitlistForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    posthog.capture('waitlist_signup_submitted', { email });
+    posthog.identify(email, { email });
     const result = await signup(email);
     if (result) {
       setEmail('');

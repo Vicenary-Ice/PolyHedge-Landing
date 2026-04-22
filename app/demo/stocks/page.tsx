@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { AnalysisResult } from '@/components/ui/analysis-result';
 import { useSearchLimit } from '@/lib/hooks/useSearchLimit';
 import { SearchLimitOverlay } from '@/components/search-limit-overlay';
+import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -18,7 +19,7 @@ export default function StockSearchPage() {
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [showOverlay, setShowOverlay] = useState(false);
-  const { searchCount, maxSearches, tierName, incrementSearch, isInitialized, resetSearches } = useSearchLimit();
+  const { searchCount, maxSearches, tierName, incrementSearch, isInitialized } = useSearchLimit();
 
   const addLog = (msg: string) => {
     setLogs((prev: string[]) => [...prev.slice(-4), `> ${msg}`]);
@@ -29,6 +30,7 @@ export default function StockSearchPage() {
     if (!query || !isInitialized) return;
     
     if (searchCount >= maxSearches) {
+      posthog.capture('search_limit_reached', { tier: tierName, max_searches: maxSearches });
       setShowOverlay(true);
       addLog('ACCESS_DENIED: TRIAL_LIMIT_REACHED');
       return;
@@ -61,6 +63,7 @@ export default function StockSearchPage() {
 
       setAnalysis(data.analysis);
       addLog('ANALYSIS COMPLETE. DECRYPTING REPORT...');
+      posthog.capture('stock_search_performed', { ticker: query.toUpperCase(), tier: tierName, searches_used: searchCount + 1 });
       incrementSearch();
     } catch (err: any) {
       const errorMessage = err.message || 'Unknown network error';
