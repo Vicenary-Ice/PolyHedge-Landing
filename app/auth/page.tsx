@@ -2,9 +2,10 @@
 
 import React, { useState, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Mail, Lock, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight, ShieldCheck, Cpu, AlertCircle } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { GlitchLogo } from '@/components/navigation';
@@ -13,16 +14,23 @@ import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
+
 function AuthForm() {
   const [mode, setMode] = useState<'login' | 'signup'>('signup');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [activatedPlan, setActivatedPlan] = useState<string | null>(null);
+  const [nameValue, setNameValue] = useState('');
   const [emailValue, setEmailValue] = useState('');
+  const [passwordValue, setPasswordValue] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Handle payment success from Stripe
   React.useEffect(() => {
     const paid = searchParams.get('paid');
     const plan = searchParams.get('plan');
@@ -41,20 +49,39 @@ function AuthForm() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    posthog.capture('auth_form_submitted', { mode });
-    if (emailValue) {
-      posthog.identify(emailValue, { email: emailValue });
-    }
+    setAuthError(null);
     setIsLoading(true);
 
-    await new Promise(r => setTimeout(r, 2000));
+    try {
+      if (mode === 'signup') {
+        const { error } = await supabase.auth.signUp({
+          email: emailValue,
+          password: passwordValue,
+          options: { data: { full_name: nameValue } },
+        });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: emailValue,
+          password: passwordValue,
+        });
+        if (error) throw error;
+      }
 
-    const intent = searchParams.get('intent');
-    if (intent === 'demo') {
-      localStorage.setItem(TIER_STORAGE_KEY, 'Observer');
-      router.push('/demo');
-    } else {
-      router.push('/pricing');
+      posthog.capture('auth_form_submitted', { mode });
+      posthog.identify(emailValue, { email: emailValue });
+
+      const intent = searchParams.get('intent');
+      if (intent === 'demo') {
+        localStorage.setItem(TIER_STORAGE_KEY, 'Observer');
+        router.push('/demo');
+      } else {
+        router.push('/pricing');
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Authentication failed';
+      setAuthError(message);
+      setIsLoading(false);
     }
   };
 
@@ -114,6 +141,8 @@ function AuthForm() {
                 type="text"
                 placeholder="Full Name"
                 required
+                value={nameValue}
+                onChange={(e) => setNameValue(e.target.value)}
                 className="w-full bg-[#111111] border-2 border-[#1E1E1E] rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-[#00FF94] transition-colors"
               />
             </motion.div>
@@ -142,9 +171,18 @@ function AuthForm() {
             type="password"
             placeholder="••••••••"
             required
+            value={passwordValue}
+            onChange={(e) => setPasswordValue(e.target.value)}
             className="w-full bg-[#111111] border-2 border-[#1E1E1E] rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-[#00FF94] transition-colors"
           />
         </div>
+
+        {authError && (
+          <div className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/40 rounded-xl text-red-400 text-sm">
+            <AlertCircle size={16} className="shrink-0" />
+            {authError}
+          </div>
+        )}
 
         <motion.button
           whileHover={{ scale: 1.02 }}
