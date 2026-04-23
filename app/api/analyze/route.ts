@@ -1,9 +1,11 @@
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchPolymarketContext } from '@/lib/prediction-feeds';
 import { synthesizeForensicContext } from '@/lib/forensics';
 import { getPostHogClient } from '@/lib/posthog-server';
 
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
+const OBSERVER_LIMIT = 3;
 const MODEL = 'meta/llama-3.1-8b-instruct';
 const BASE_URL = 'https://integrate.api.nvidia.com/v1';
 
@@ -16,6 +18,34 @@ export async function POST(request: NextRequest) {
 
     if (!topic || !type) {
       return NextResponse.json({ error: 'Topic and type are required' }, { status: 400 });
+    }
+
+    // Enforce search limit server-side using the user's JWT
+    const authHeader = request.headers.get('Authorization');
+    const accessToken = authHeader?.replace('Bearer ', '');
+    if (accessToken) {
+      const userSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { global: { headers: { Authorization: `Bearer ${accessToken}` } } }
+      );
+      const { data: { user } } = await userSupabase.auth.getUser();
+      if (user) {
+        const { data: usage } = await userSupabase
+          .from('search_usage')
+          .select('search_count')
+          .eq('user_id', user.id)
+          .single();
+        const count = usage?.search_count ?? 0;
+        if (count >= OBSERVER_LIMIT) {
+          return NextResponse.json({ error: 'Search limit reached. Please upgrade your plan.' }, { status: 429 });
+        }
+        // Increment count
+        await userSupabase.from('search_usage').upsert(
+          { user_id: user.id, search_count: count + 1, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        );
+      }
     }
 
     const posthog = getPostHogClient();

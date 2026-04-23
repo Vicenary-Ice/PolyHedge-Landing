@@ -14,40 +14,41 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 );
 
+export { supabase };
+
 export function useSearchLimit() {
   const [searchCount, setSearchCount] = useState<number>(0);
   const [tier, setTier] = useState<TierName>(DEFAULT_TIER);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    async function init() {
-      const savedTier = localStorage.getItem(TIER_STORAGE_KEY) as TierName;
-      if (savedTier && SUBSCRIPTION_TIERS[savedTier]) {
-        setTier(savedTier);
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-
-      if (session?.user) {
-        // Fetch count from Supabase
-        const { data } = await supabase
-          .from('search_usage')
-          .select('search_count')
-          .eq('user_id', session.user.id)
-          .single();
-
-        setSearchCount(data?.search_count ?? 0);
-      }
-
-      setIsInitialized(true);
+    const savedTier = localStorage.getItem(TIER_STORAGE_KEY) as TierName;
+    if (savedTier && SUBSCRIPTION_TIERS[savedTier]) {
+      setTier(savedTier);
     }
 
-    init();
+    // onAuthStateChange fires immediately with INITIAL_SESSION — more reliable than getSession()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+          if (session?.user) {
+            const { data } = await supabase
+              .from('search_usage')
+              .select('search_count')
+              .eq('user_id', session.user.id)
+              .single();
+            setSearchCount(data?.search_count ?? 0);
+          }
+          setIsInitialized(true);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const incrementSearch = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
-
     if (!session?.user) return;
 
     const newCount = searchCount + 1;

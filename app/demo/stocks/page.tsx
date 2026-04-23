@@ -6,7 +6,7 @@ import { Search, ArrowLeft, Loader2 } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import Link from 'next/link';
 import { AnalysisResult } from '@/components/ui/analysis-result';
-import { useSearchLimit } from '@/lib/hooks/useSearchLimit';
+import { useSearchLimit, supabase } from '@/lib/hooks/useSearchLimit';
 import { SearchLimitOverlay } from '@/components/search-limit-overlay';
 import posthog from 'posthog-js';
 
@@ -50,9 +50,13 @@ export default function StockSearchPage() {
     addLog('SYNTHESIZING MARKET SIGNALS VIA MIROFISH...');
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const response = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
         body: JSON.stringify({ topic: query, type: 'stock' }),
       });
 
