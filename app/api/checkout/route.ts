@@ -48,6 +48,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: session.url });
   } catch (err: any) {
     console.error('Stripe error:', err);
-    return new NextResponse('Internal Error', { status: 500 });
+    return NextResponse.json({ error: err.message || 'Stripe error' }, { status: 500 });
   }
 }
