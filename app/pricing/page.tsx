@@ -29,11 +29,13 @@ interface PricingCardProps {
 
 function PricingCard({ name, price, description, features, recommended, icon }: PricingCardProps) {
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
   const router = useRouter();
 
   const handleCheckout = async () => {
     try {
       setLoading(true);
+      setError(null);
       posthog.capture('checkout_initiated', { plan_name: name, price_usd: Number(price) });
 
       if (Number(price) === 0) {
@@ -50,9 +52,11 @@ function PricingCard({ name, price, description, features, recommended, icon }: 
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
+      } else {
+        setError(data.error || 'Checkout failed — no redirect URL returned');
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setError(err.message || 'Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -104,6 +108,9 @@ function PricingCard({ name, price, description, features, recommended, icon }: 
       >
         {loading ? 'PROCESSING...' : `GET ${name.toUpperCase()} ACCESS`}
       </button>
+      {error && (
+        <p className="mt-3 text-red-400 text-xs text-center">{error}</p>
+      )}
     </motion.div>
   );
 }
