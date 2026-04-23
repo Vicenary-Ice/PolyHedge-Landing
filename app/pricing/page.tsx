@@ -193,7 +193,7 @@ export default function PricingPage() {
           >
             <p className="text-[#00FF94] font-mono text-sm mb-4 tracking-widest uppercase">// SUBSCRIPTION MODELS</p>
             <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
-              PICK THE RIGHT <span className="text-[#00FF94]">PLAN</span> <br />FOR YOUR EDGE
+              PICK THE RIGHT <span className="text-[#00FF94]">PLAN</span> <br />FOR YOU
             </h1>
             <p className="max-w-2xl mx-auto text-[#888888] text-lg mb-16">
               Institutional-grade data infrastructure designed for the modern trader. 
@@ -208,21 +208,6 @@ export default function PricingPage() {
             ))}
           </div>
 
-          {/* CTA Footer */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="p-12 rounded-2xl border-2 border-[#1E1E1E] bg-[#111111] max-w-3xl mx-auto relative group overflow-hidden text-center"
-          >
-            <div className="absolute top-0 left-0 w-full h-1 bg-[#00FF94] opacity-50 group-hover:opacity-100 transition-opacity" />
-            <h2 className="text-3xl font-bold mb-6">Ready to secure your edge?</h2>
-            <p className="text-[#888888] mb-8">
-              Join 5,000+ institutional traders today. Instant account activation.
-            </p>
-            <Link href="/auth" className="inline-block px-8 py-4 bg-[#00FF94] text-[#0A0A0A] rounded-lg font-bold hover:shadow-[0_0_20px_rgba(0,255,148,0.4)] transition-all">
-              CREATE INSTITUTIONAL ACCOUNT
-            </Link>
-          </motion.div>
         </div>
       </section>
 
