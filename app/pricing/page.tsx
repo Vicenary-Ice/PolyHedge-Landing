@@ -128,7 +128,7 @@ export default function PricingPage() {
     },
     {
       name: 'Trader',
-      price: '20',
+      price: '10',
       description: 'Enhanced tracking for active market participants.',
       recommended: true,
       icon: <Zap size={32} />,
@@ -142,7 +142,7 @@ export default function PricingPage() {
     },
     {
       name: 'Quant',
-      price: '200',
+      price: '50',
       description: 'Full simulation engine and programmatic execution.',
       icon: <Cpu size={32} />,
       features: [
