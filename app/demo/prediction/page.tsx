@@ -8,9 +8,6 @@ import Link from 'next/link';
 import { AnalysisResult } from '@/components/ui/analysis-result';
 import { useSearchLimit, supabase } from '@/lib/hooks/useSearchLimit';
 import { SearchLimitOverlay } from '@/components/search-limit-overlay';
-import { DottedSurface } from '@/components/ui/dotted-surface';
-import { FloatingParticles } from '@/components/background-effects';
-import { GlitchLogo } from '@/components/navigation';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -79,17 +76,15 @@ export default function PredictionSearchPage() {
   };
 
   return (
-    <div className={`${geist.className} min-h-screen text-white p-8 flex flex-col items-center relative overflow-hidden`} style={{ backgroundColor: '#0A0A0A' }}>
-      <DottedSurface />
-      <FloatingParticles />
-
-      <div className="absolute top-8 left-8 z-20">
-        <GlitchLogo />
+    <div className={`${geist.className} min-h-screen bg-black text-white p-8 flex flex-col items-center`}>
+      {/* Background scanline effect */}
+      <div className="fixed inset-0 pointer-events-none opacity-5 z-5 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_2px]"></div>
       </div>
 
-      <div className="max-w-4xl w-full relative z-10 pt-20">
-        <Link href="/demo" className="inline-flex items-center gap-2 hover:text-white transition-colors mb-12 text-sm tracking-widest uppercase" style={{ color: '#525252' }}>
-          <ArrowLeft size={16} /> Back to Selection
+      <div className="max-w-4xl w-full relative z-10">
+        <Link href="/demo" className="inline-flex items-center gap-2 text-muted hover:text-white transition-colors mb-12" style={{ color: '#444444' }}>
+          <ArrowLeft size={16} /> BACK TO SELECTION
         </Link>
 
         <div className="mb-12">
@@ -113,8 +108,8 @@ export default function PredictionSearchPage() {
             placeholder="Enter Topic (e.g. US Election 2024, Fed Rate Decision, SpaceX Launch)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border-2 rounded-xl px-6 py-5 text-xl focus:outline-none transition-colors pr-16"
-            style={{ backgroundColor: '#0E0E0E', borderColor: '#1A1A1A' }}
+            className="w-full bg-card border-2 border-border rounded-lg px-6 py-5 text-xl focus:outline-none focus:border-accent transition-colors pr-16"
+            style={{ backgroundColor: '#111111', borderColor: '#1E1E1E' }}
             disabled={isSearching}
           />
           <button 
@@ -128,7 +123,7 @@ export default function PredictionSearchPage() {
         </form>
 
         {/* Terminal Logs */}
-        <div className="mb-12 min-h-[140px] font-mono text-sm p-6 rounded-xl border" style={{ backgroundColor: 'rgba(14,14,14,0.8)', borderColor: '#1A1A1A' }}>
+        <div className="mb-12 min-h-[140px] font-mono text-sm bg-black/40 p-6 rounded border border-border/50" style={{ borderColor: 'rgba(30, 30, 30, 0.5)' }}>
           {logs.length === 0 && <span className="text-muted italic" style={{ color: '#444444' }}>Waiting for event parameters...</span>}
           {logs.map((log, i) => (
             <motion.div 
