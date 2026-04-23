@@ -47,6 +47,12 @@ function AuthForm() {
     }
   }, [searchParams, router]);
 
+  const switchMode = (next: 'login' | 'signup') => {
+    setAuthError(null);
+    posthog.capture('auth_mode_switched', { from: mode, to: next });
+    setMode(next);
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
@@ -54,12 +60,18 @@ function AuthForm() {
 
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: emailValue,
           password: passwordValue,
           options: { data: { full_name: nameValue } },
         });
         if (error) throw error;
+        // Supabase returns an empty identities array when the email already exists
+        if (data.user?.identities?.length === 0) {
+          setAuthError('An account with this email already exists. Please log in instead.');
+          setIsLoading(false);
+          return;
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: emailValue,
@@ -91,10 +103,37 @@ function AuthForm() {
       animate={{ opacity: 1, scale: 1 }}
       className="w-full max-w-md relative z-10"
     >
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00FF94]/10 border border-[#00FF94]/30 text-[#00FF94] text-[10px] font-bold mb-4 tracking-[0.2em] uppercase">
+      <div className="text-center mb-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00FF94]/10 border border-[#00FF94]/30 text-[#00FF94] text-[10px] font-bold mb-6 tracking-[0.2em] uppercase">
           <Cpu size={12} /> SECURE_HANDSHAKE_NODE
         </div>
+
+        {/* Mode tab switcher */}
+        <div className="flex bg-[#111111] border border-[#1E1E1E] rounded-xl p-1 mb-8">
+          <button
+            type="button"
+            onClick={() => switchMode('signup')}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold tracking-widest uppercase transition-all ${
+              mode === 'signup'
+                ? 'bg-[#00FF94] text-[#0A0A0A]'
+                : 'text-[#888888] hover:text-white'
+            }`}
+          >
+            Sign Up
+          </button>
+          <button
+            type="button"
+            onClick={() => switchMode('login')}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold tracking-widest uppercase transition-all ${
+              mode === 'login'
+                ? 'bg-[#00FF94] text-[#0A0A0A]'
+                : 'text-[#888888] hover:text-white'
+            }`}
+          >
+            Log In
+          </button>
+        </div>
+
         <h1 className="text-4xl font-bold mb-4">
           {mode === 'signup' ? 'Create Account' : 'Operator Login'}
         </h1>
@@ -178,9 +217,20 @@ function AuthForm() {
         </div>
 
         {authError && (
-          <div className="flex items-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/40 rounded-xl text-red-400 text-sm">
-            <AlertCircle size={16} className="shrink-0" />
-            {authError}
+          <div className="flex items-start gap-2 px-4 py-3 bg-red-500/10 border border-red-500/40 rounded-xl text-red-400 text-sm">
+            <AlertCircle size={16} className="shrink-0 mt-0.5" />
+            <span>
+              {authError}
+              {authError.includes('log in') && (
+                <button
+                  type="button"
+                  onClick={() => switchMode('login')}
+                  className="ml-1 underline text-red-300 hover:text-white transition-colors"
+                >
+                  Switch to login
+                </button>
+              )}
+            </span>
           </div>
         )}
 
@@ -208,21 +258,6 @@ function AuthForm() {
           )}
         </motion.button>
       </form>
-
-      <div className="mt-8 text-center">
-        <button
-          onClick={() => {
-            const next = mode === 'login' ? 'signup' : 'login';
-            posthog.capture('auth_mode_switched', { from: mode, to: next });
-            setMode(next);
-          }}
-          className="text-[#888888] hover:text-white transition-colors text-sm"
-        >
-          {mode === 'signup'
-            ? 'Already have an account? Login'
-            : "Don't have an account? Sign up"}
-        </button>
-      </div>
 
       <div className="mt-16 pt-8 border-t border-[#1E1E1E] flex flex-col items-center">
         <div className="flex items-center gap-2 text-[#444444] text-[10px] font-bold tracking-widest uppercase mb-4">
