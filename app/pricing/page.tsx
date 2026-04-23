@@ -8,7 +8,6 @@ import { useRouter } from 'next/navigation';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { TickerBar, Navbar } from '@/components/navigation';
-import Link from 'next/link';
 import posthog from 'posthog-js';
 import { TIER_STORAGE_KEY } from '@/lib/constants/tiers';
 
