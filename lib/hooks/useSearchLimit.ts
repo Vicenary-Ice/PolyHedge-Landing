@@ -1,13 +1,18 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { 
-  SUBSCRIPTION_TIERS, 
-  DEFAULT_TIER, 
-  TIER_STORAGE_KEY, 
-  SEARCH_STORAGE_KEY,
-  TierName 
+import { createClient } from '@supabase/supabase-js';
+import {
+  SUBSCRIPTION_TIERS,
+  DEFAULT_TIER,
+  TIER_STORAGE_KEY,
+  TierName,
 } from '../constants/tiers';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+);
 
 export function useSearchLimit() {
   const [searchCount, setSearchCount] = useState<number>(0);
@@ -15,42 +20,59 @@ export function useSearchLimit() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Reset credits as requested by the user for this session
-    localStorage.removeItem('polyhedge_searches_v1');
-    
-    // Original initialization logic
-    const savedCount = localStorage.getItem(SEARCH_STORAGE_KEY);
-    const savedTier = localStorage.getItem(TIER_STORAGE_KEY) as TierName;
+    async function init() {
+      const savedTier = localStorage.getItem(TIER_STORAGE_KEY) as TierName;
+      if (savedTier && SUBSCRIPTION_TIERS[savedTier]) {
+        setTier(savedTier);
+      }
 
-    if (savedCount) {
-      setSearchCount(parseInt(savedCount, 10));
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        // Fetch count from Supabase
+        const { data } = await supabase
+          .from('search_usage')
+          .select('search_count')
+          .eq('user_id', session.user.id)
+          .single();
+
+        setSearchCount(data?.search_count ?? 0);
+      }
+
+      setIsInitialized(true);
     }
-    if (savedTier && SUBSCRIPTION_TIERS[savedTier]) {
-      setTier(savedTier);
-    }
-    setIsInitialized(true);
+
+    init();
   }, []);
 
-  // Update localStorage when count changes
-  useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem(SEARCH_STORAGE_KEY, searchCount.toString());
-      localStorage.setItem(TIER_STORAGE_KEY, tier);
-    }
-  }, [searchCount, tier, isInitialized]);
+  const incrementSearch = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
 
-  const incrementSearch = useCallback(() => {
-    setSearchCount((prev) => prev + 1);
-  }, []);
+    if (!session?.user) return;
 
-  const resetSearches = useCallback(() => {
+    const newCount = searchCount + 1;
+    setSearchCount(newCount);
+
+    await supabase.from('search_usage').upsert(
+      { user_id: session.user.id, search_count: newCount, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' },
+    );
+  }, [searchCount]);
+
+  const resetSearches = useCallback(async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
     setSearchCount(0);
-    localStorage.setItem(SEARCH_STORAGE_KEY, '0');
+    await supabase.from('search_usage').upsert(
+      { user_id: session.user.id, search_count: 0, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' },
+    );
   }, []);
 
   const upgradeTier = useCallback((newTier: TierName) => {
     if (SUBSCRIPTION_TIERS[newTier]) {
       setTier(newTier);
+      localStorage.setItem(TIER_STORAGE_KEY, newTier);
     }
   }, []);
 
@@ -69,6 +91,6 @@ export function useSearchLimit() {
     resetSearches,
     upgradeTier,
     isInitialized,
-    maxSearches
+    maxSearches,
   };
 }
