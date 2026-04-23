@@ -27,8 +27,8 @@ export async function POST(req: Request) {
         },
       ],
       mode: 'subscription',
-      success_url: `http://localhost:3000/auth?paid=true&plan=${planName}`,
-      cancel_url: `http://localhost:3000/pricing`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth?paid=true&plan=${planName}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/pricing`,
     });
 
     if (!session.url) throw new Error('No session URL returned from Stripe');
