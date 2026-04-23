@@ -4,11 +4,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check, Shield, Zap, Cpu } from 'lucide-react';
 import { Geist } from 'next/font/google';
+import { useRouter } from 'next/navigation';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { TickerBar, Navbar } from '@/components/navigation';
 import Link from 'next/link';
 import posthog from 'posthog-js';
+import { TIER_STORAGE_KEY } from '@/lib/constants/tiers';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -27,11 +29,19 @@ interface PricingCardProps {
 
 function PricingCard({ name, price, description, features, recommended, icon }: PricingCardProps) {
   const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
 
   const handleCheckout = async () => {
     try {
       setLoading(true);
       posthog.capture('checkout_initiated', { plan_name: name, price_usd: Number(price) });
+
+      if (Number(price) === 0) {
+        localStorage.setItem(TIER_STORAGE_KEY, name);
+        router.push('/demo');
+        return;
+      }
+
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
