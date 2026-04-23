@@ -11,14 +11,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ url: '/auth' }); // Free tier skips payment
     }
 
+    const productId = planName === 'Quant'
+      ? process.env.STRIPE_PRODUCT_ID_QUANT
+      : process.env.STRIPE_PRODUCT_ID_TRADER;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
             currency: 'usd',
-            product: process.env.STRIPE_PRODUCT_ID,
-            unit_amount: amount * 100, // dollars to cents
+            product: productId,
+            unit_amount: amount * 100,
             recurring: {
               interval: 'month',
             },
