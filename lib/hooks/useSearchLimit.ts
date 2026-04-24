@@ -32,6 +32,13 @@ export function useSearchLimit() {
       async (event, session) => {
         if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
           if (session?.user) {
+            // Read tier from user metadata (source of truth across devices)
+            const tierFromMetadata = session.user.user_metadata?.tier as TierName;
+            if (tierFromMetadata && SUBSCRIPTION_TIERS[tierFromMetadata]) {
+              setTier(tierFromMetadata);
+              localStorage.setItem(TIER_STORAGE_KEY, tierFromMetadata);
+            }
+
             const { data } = await supabase
               .from('search_usage')
               .select('search_count')

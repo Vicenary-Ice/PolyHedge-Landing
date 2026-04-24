@@ -36,13 +36,15 @@ function AuthForm() {
     const plan = searchParams.get('plan');
 
     if (paid === 'true' && plan) {
+      // Persist tier to user account so it survives new sessions
+      supabase.auth.updateUser({ data: { tier: plan } });
       localStorage.setItem(TIER_STORAGE_KEY, plan);
       setPaymentSuccess(true);
       setActivatedPlan(plan);
 
       const timeout = setTimeout(() => {
-        router.replace('/auth');
-      }, 5000);
+        router.push('/demo');
+      }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [searchParams, router]);
@@ -83,9 +85,21 @@ function AuthForm() {
       posthog.capture('auth_form_submitted', { mode });
       posthog.identify(emailValue, { email: emailValue });
 
+      const { data: { user } } = await supabase.auth.getUser();
+      const existingTier = user?.user_metadata?.tier;
+
       const intent = searchParams.get('intent');
       if (intent === 'demo') {
-        localStorage.setItem(TIER_STORAGE_KEY, 'Observer');
+        if (!existingTier) {
+          await supabase.auth.updateUser({ data: { tier: 'Observer' } });
+          localStorage.setItem(TIER_STORAGE_KEY, 'Observer');
+        } else {
+          localStorage.setItem(TIER_STORAGE_KEY, existingTier);
+        }
+        router.push('/demo');
+      } else if (existingTier) {
+        // Already has a plan — skip pricing page
+        localStorage.setItem(TIER_STORAGE_KEY, existingTier);
         router.push('/demo');
       } else {
         router.push('/pricing');
