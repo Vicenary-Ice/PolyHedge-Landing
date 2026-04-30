@@ -55,9 +55,31 @@ function AuthForm() {
     setMode(next);
   };
 
+  const friendlyError = (msg: string): string => {
+    if (msg.includes('Password should be at least') || msg.includes('password'))
+      return 'Password must be at least 6 characters.';
+    if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials'))
+      return 'Incorrect email or password.';
+    if (msg.includes('Email not confirmed'))
+      return 'Please confirm your email before logging in. Check your inbox.';
+    if (msg.includes('Email rate limit') || msg.includes('email_send_failed') || msg.includes('rate limit'))
+      return 'Too many signup attempts. Please wait a few minutes and try again.';
+    if (msg.includes('User already registered'))
+      return 'An account with this email already exists. Please log in instead.';
+    if (msg.includes('signup_disabled'))
+      return 'New signups are temporarily disabled. Please try again later.';
+    return msg;
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+
+    if (mode === 'signup' && passwordValue.length < 6) {
+      setAuthError('Password must be at least 6 characters.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -68,10 +90,17 @@ function AuthForm() {
           options: { data: { full_name: nameValue } },
         });
         if (error) throw error;
-        // Supabase returns an empty identities array when the email already exists
         if (data.user?.identities?.length === 0) {
           setAuthError('An account with this email already exists. Please log in instead.');
           setIsLoading(false);
+          return;
+        }
+        // Email confirmation required — session won't exist yet
+        if (!data.session) {
+          setAuthError(null);
+          setIsLoading(false);
+          setAuthError('Account created! Check your email to confirm your address, then log in.');
+          switchMode('login');
           return;
         }
       } else {
@@ -98,7 +127,6 @@ function AuthForm() {
         }
         router.push('/demo');
       } else if (existingTier) {
-        // Already has a plan — skip pricing page
         localStorage.setItem(TIER_STORAGE_KEY, existingTier);
         router.push('/demo');
       } else {
@@ -106,7 +134,7 @@ function AuthForm() {
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Authentication failed';
-      setAuthError(message);
+      setAuthError(friendlyError(message));
       setIsLoading(false);
     }
   };
@@ -229,9 +257,16 @@ function AuthForm() {
             className="w-full bg-[#111111] border-2 border-[#1E1E1E] rounded-xl py-4 pl-12 pr-4 focus:outline-none focus:border-[#00FF94] transition-colors"
           />
         </div>
+        {mode === 'signup' && (
+          <p className="text-[#555555] text-xs pl-1">Minimum 6 characters</p>
+        )}
 
         {authError && (
-          <div className="flex items-start gap-2 px-4 py-3 bg-red-500/10 border border-red-500/40 rounded-xl text-red-400 text-sm">
+          <div className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm border ${
+            authError.includes('Check your email') || authError.includes('Account created')
+              ? 'bg-[#00FF94]/10 border-[#00FF94]/40 text-[#00FF94]'
+              : 'bg-red-500/10 border-red-500/40 text-red-400'
+          }`}>
             <AlertCircle size={16} className="shrink-0 mt-0.5" />
             <span>
               {authError}
@@ -239,7 +274,7 @@ function AuthForm() {
                 <button
                   type="button"
                   onClick={() => switchMode('login')}
-                  className="ml-1 underline text-red-300 hover:text-white transition-colors"
+                  className="ml-1 underline hover:text-white transition-colors"
                 >
                   Switch to login
                 </button>
