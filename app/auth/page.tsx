@@ -20,7 +20,8 @@ const supabase = createClient(
 );
 
 function AuthForm() {
-  const [mode, setMode] = useState<'login' | 'signup'>('signup');
+  const intent = searchParams.get('intent');
+  const [mode, setMode] = useState<'login' | 'signup'>(intent === 'demo' ? 'login' : 'signup');
   const [isLoading, setIsLoading] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [activatedPlan, setActivatedPlan] = useState<string | null>(null);
@@ -32,6 +33,17 @@ function AuthForm() {
   const searchParams = useSearchParams();
 
   React.useEffect(() => {
+    // If already logged in and coming from Access button, skip auth entirely
+    if (intent === 'demo') {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
+          const tier = session.user.user_metadata?.tier;
+          if (tier) localStorage.setItem(TIER_STORAGE_KEY, tier);
+          router.replace('/demo');
+        }
+      });
+    }
+
     const paid = searchParams.get('paid');
     const plan = searchParams.get('plan');
 
@@ -116,8 +128,6 @@ function AuthForm() {
 
       const { data: { user } } = await supabase.auth.getUser();
       const existingTier = user?.user_metadata?.tier;
-
-      const intent = searchParams.get('intent');
       if (intent === 'demo') {
         if (!existingTier) {
           await supabase.auth.updateUser({ data: { tier: 'Observer' } });
