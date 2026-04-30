@@ -20,6 +20,8 @@ const supabase = createClient(
 );
 
 function AuthForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const intent = searchParams.get('intent');
   const [mode, setMode] = useState<'login' | 'signup'>(intent === 'demo' ? 'login' : 'signup');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,9 +31,6 @@ function AuthForm() {
   const [emailValue, setEmailValue] = useState('');
   const [passwordValue, setPasswordValue] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   React.useEffect(() => {
     // If already logged in and coming from Access button, skip auth entirely
     if (intent === 'demo') {
