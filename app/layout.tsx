@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: "PolyHedge | Alternative Data for Traders",
   description: "Proprietary alternative data intelligence platform for stock market and prediction market traders.",
   icons: {
-    icon: "/icon.png",
+    icon: "/Icon(1).png",
   },
 };
 
