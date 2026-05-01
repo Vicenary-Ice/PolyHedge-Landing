@@ -514,7 +514,6 @@ function Navbar({ activeSection }: { activeSection: string }) {
     { id: 'architecture', label: 'Architecture' },
     { id: 'demo', label: 'Demo' },
     { id: 'coverage', label: 'Coverage' },
-    { id: 'pricing', label: 'Access' },
   ];
 
   return (
@@ -574,7 +573,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
             color: COLORS.bg,
           }}
         >
-          Access demo
+          Access
           <ArrowUpRight size={12} strokeWidth={2.5} />
         </a>
       </div>
