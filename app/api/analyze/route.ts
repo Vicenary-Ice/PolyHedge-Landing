@@ -5,7 +5,12 @@ import { synthesizeForensicContext } from '@/lib/forensics';
 import { getPostHogClient } from '@/lib/posthog-server';
 
 const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;
-const OBSERVER_LIMIT = 3;
+
+const TIER_LIMITS: Record<string, number> = {
+  Observer: 3,
+  Trader: 50,
+  Quant: 1000,
+};
 const MODEL = 'meta/llama-3.1-8b-instruct';
 const BASE_URL = 'https://integrate.api.nvidia.com/v1';
 
@@ -31,16 +36,17 @@ export async function POST(request: NextRequest) {
       );
       const { data: { user } } = await userSupabase.auth.getUser();
       if (user) {
+        const tier = user.user_metadata?.tier ?? 'Observer';
+        const limit = TIER_LIMITS[tier] ?? TIER_LIMITS.Observer;
         const { data: usage } = await userSupabase
           .from('search_usage')
           .select('search_count')
           .eq('user_id', user.id)
           .single();
         const count = usage?.search_count ?? 0;
-        if (count >= OBSERVER_LIMIT) {
+        if (count >= limit) {
           return NextResponse.json({ error: 'Search limit reached. Please upgrade your plan.' }, { status: 429 });
         }
-        // Increment count
         await userSupabase.from('search_usage').upsert(
           { user_id: user.id, search_count: count + 1, updated_at: new Date().toISOString() },
           { onConflict: 'user_id' }
@@ -155,16 +161,16 @@ export async function POST(request: NextRequest) {
     // --- LIVE FEED INTEGRATION ---
     if (type === 'prediction') {
       console.log(`[${requestId}] Fetching live prediction feeds for: ${topic}`);
-      const marketsRes = await fetch(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=10&order=volume&dir=desc&term=${encodeURIComponent(topic)}`);
-      const markets = marketsRes.ok ? await marketsRes.json() : [];
-      
-      const liveContext = await fetchPolymarketContext(topic);
+      const [liveContext, markets] = await Promise.all([
+        fetchPolymarketContext(topic),
+        fetch(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=10&order=volume&dir=desc&term=${encodeURIComponent(topic)}`)
+          .then(r => r.ok ? r.json() : []).catch(() => []),
+      ]);
       const forensicContext = synthesizeForensicContext(markets);
-      
       console.log(`[${requestId}] Live context and forensics acquired.`);
-      finalPrompt = `${systemPrompt}\n\n${liveContext}\n\n${forensicContext}\n\nCURRENT DATE: April 2026`;
+      finalPrompt = `${systemPrompt}\n\n${liveContext ?? ''}\n\n${forensicContext}\n\nCURRENT DATE: May 2026`;
     } else {
-      finalPrompt = `${systemPrompt}\n\nCURRENT DATE: April 2026`;
+      finalPrompt = `${systemPrompt}\n\nCURRENT DATE: May 2026`;
     }
 
     console.log(`[${requestId}] Calling NVIDIA API for model: ${MODEL} (Extended Context)...`);
