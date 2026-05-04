@@ -5,19 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Lock, ArrowRight, ShieldCheck, Cpu, AlertCircle } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { GlitchLogo } from '@/components/navigation';
 import { TIER_STORAGE_KEY } from '@/lib/constants/tiers';
+import { supabase } from '@/lib/supabase';
 import posthog from 'posthog-js';
 
 const geist = Geist({ subsets: ['latin'] });
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
 
 function AuthForm() {
   const router = useRouter();
