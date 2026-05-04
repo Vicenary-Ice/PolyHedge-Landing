@@ -8,9 +8,6 @@ const geist = Geist({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "PolyHedge | Alternative Data for Traders",
   description: "Proprietary alternative data intelligence platform for stock market and prediction market traders.",
-  icons: {
-    icon: "/favicon.png",
-  },
 };
 
 export default function RootLayout({
