@@ -43,6 +43,13 @@ export type SignalModel = {
   probeRatio: string;
 };
 
+export type LiveSignalSnapshot = {
+  confidence?: number;
+  chartValues?: number[];
+  status?: string;
+  secondaryStatus?: string;
+};
+
 export const CONFIG: Record<DemoType, TerminalConfig> = {
   stock: {
     env: 'STOCK_DATA_ENV',
@@ -191,11 +198,12 @@ export function buildSignalModel(
   analysis: string | null,
   isSearching: boolean,
   activeSources: string[],
+  liveSignal?: LiveSignalSnapshot | null,
 ): SignalModel {
   const config = CONFIG[type];
-  const baseConfidence = isSearching ? config.fallbackConfidence - 3 : confidence(analysis, config.fallbackConfidence);
+  const baseConfidence = liveSignal?.confidence ?? (isSearching ? config.fallbackConfidence - 3 : confidence(analysis, config.fallbackConfidence));
   const baseSeries = isSearching
-    ? loadingSeries(type)
+    ? liveSignal?.chartValues ?? loadingSeries(type)
     : fitSeriesToConfidence(parsedChart(analysis) ?? config.fallbackChart, baseConfidence);
   const adjusted = adjustForSources(baseSeries, baseConfidence, config, activeSources);
   const probeIndex = Math.min(Math.max(Math.round(adjusted.values.length * 0.68), 1), adjusted.values.length - 2);
@@ -205,8 +213,8 @@ export function buildSignalModel(
   return {
     confidence: adjusted.confidence,
     chartValues: adjusted.values,
-    status: isSearching ? 'SCANNING' : advisory(analysis, type, config.statusFallback),
-    secondaryStatus: type === 'prediction' ? `VALUE WEDGE ${edge}%` : 'UPDATED 09:41:28 ET',
+    status: liveSignal?.status ?? (isSearching ? 'SCANNING' : advisory(analysis, type, config.statusFallback)),
+    secondaryStatus: liveSignal?.secondaryStatus ?? (type === 'prediction' ? `VALUE WEDGE ${edge}%` : 'UPDATED 09:41:28 ET'),
     probeIndex,
     probeValue,
     probeRatio: (probeValue / 100).toFixed(type === 'stock' ? 3 : 2),
@@ -219,10 +227,34 @@ export function subjectFor(type: DemoType, query: string) {
   return type === 'stock' ? value.toUpperCase() : value;
 }
 
+function compactTopicCode(subject: string) {
+  const words = subject
+    .replace(/[^a-zA-Z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((word) => !['will', 'the', 'a', 'an', 'in', 'on', 'by', 'to', 'of', 'for', 'and', 'or'].includes(word.toLowerCase()))
+    .slice(0, 4);
+  return (words.length ? words : subject.split(/\s+/).slice(0, 3)).join(' ').toUpperCase();
+}
+
 export function subjectMeta(type: DemoType, subject: string) {
-  if (type === 'prediction') return 'JUN 18, 2025 | FED FOMC';
+  const cleanSubject = subject.trim();
+  const upperSubject = cleanSubject.toUpperCase();
+
+  if (type === 'prediction') {
+    const topicCode = compactTopicCode(cleanSubject);
+    if (/FED|FOMC|RATE|INFLATION|CPI/.test(upperSubject)) return `MACRO POLICY | ${topicCode}`;
+    if (/ELECTION|PRESIDENT|SENATE|HOUSE|VOTE/.test(upperSubject)) return `POLITICAL EVENT | ${topicCode}`;
+    if (/BITCOIN|BTC|ETH|CRYPTO|SOLANA/.test(upperSubject)) return `CRYPTO MARKET | ${topicCode}`;
+    if (/LAUNCH|SPACEX|STARSHIP|NASA/.test(upperSubject)) return `SPACE EVENT | ${topicCode}`;
+    if (/AI|OPENAI|NVIDIA|NVDA|MODEL/.test(upperSubject)) return `AI MARKET EVENT | ${topicCode}`;
+    return `CUSTOM EVENT | ${topicCode}`;
+  }
+
   if (subject === 'NVDA') return 'NVIDIA CORPORATION';
   if (subject === 'AAPL') return 'APPLE INC.';
   if (subject === 'TSLA') return 'TESLA INC.';
+  if (/^[A-Z.]{1,7}$/.test(subject)) return `${subject} EQUITY COVERAGE`;
+  if (cleanSubject) return `${compactTopicCode(cleanSubject)} EQUITY QUERY`;
   return 'INSTITUTIONAL EQUITY';
 }

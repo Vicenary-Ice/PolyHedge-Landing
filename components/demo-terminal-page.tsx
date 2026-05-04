@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowUpRight, Search } from 'lucide-react';
+import { Activity, ArrowLeft, ArrowRight, ArrowUpRight, Check, Circle, GitBranch, Search, X } from 'lucide-react';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
 import posthog from 'posthog-js';
@@ -13,6 +13,7 @@ import {
   CHART_WIDTH,
   CONFIG,
   DemoType,
+  LiveSignalSnapshot,
   SignalModel,
   SourceConfig,
   buildSignalModel,
@@ -29,6 +30,106 @@ const DESIGN_WIDTH = 1040;
 const DESIGN_HEIGHT = 790;
 const RAIL_WIDTH = 56;
 const VIEWPORT_GUTTER = 36;
+const MIN_LOADING_DURATION_MS = 5200;
+
+const STREAM_EVENT_DELAYS_MS: Record<string, number> = {
+  run_started: 250,
+  agent_started: 260,
+  agent_progress: 360,
+  agent_completed: 320,
+  chart_update: 120,
+  final_result: 500,
+  run_error: 150,
+};
+
+type AgentStatus = 'idle' | 'running' | 'completed' | 'failed' | 'disabled';
+
+type AgentRuntimeState = {
+  status: AgentStatus;
+  message?: string;
+};
+
+type AgentDefinition = {
+  id: string;
+  label: string;
+  column: 'source' | 'analysis' | 'synthesis';
+  source?: string;
+};
+
+type StreamEvent = {
+  type: string;
+  agent?: string;
+  message?: string;
+  chart?: number[];
+  confidence?: number;
+  status?: string;
+  analysis?: string;
+  data?: Record<string, unknown>;
+};
+
+function agentDefinitions(type: DemoType): AgentDefinition[] {
+  if (type === 'stock') {
+    return [
+      { id: 'market_data', label: 'Prices', column: 'source' },
+      { id: 'filings', label: 'Filings', column: 'source', source: 'filings' },
+      { id: 'news_context', label: 'News', column: 'source', source: 'news' },
+      { id: 'technicals', label: 'Technicals', column: 'analysis', source: 'flow' },
+      { id: 'risk', label: 'Risk', column: 'analysis' },
+      { id: 'stock_synthesis', label: 'Synthesis', column: 'synthesis' },
+    ];
+  }
+
+  return [
+    { id: 'market_odds', label: 'Odds', column: 'source', source: 'polymarket' },
+    { id: 'market_liquidity', label: 'Liquidity', column: 'source', source: 'polymarket' },
+    { id: 'news_context', label: 'Events', column: 'source', source: 'news' },
+    { id: 'calibration', label: 'Calibration', column: 'analysis', source: 'regulatory' },
+    { id: 'contradiction', label: 'Stress', column: 'analysis', source: 'regulatory' },
+    { id: 'prediction_synthesis', label: 'Synthesis', column: 'synthesis' },
+  ];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function parseSseBlock(block: string): StreamEvent | null {
+  const lines = block.split('\n');
+  const eventLine = lines.find((line) => line.startsWith('event:'));
+  const dataLines = lines.filter((line) => line.startsWith('data:'));
+  if (!dataLines.length) return null;
+
+  const eventName = eventLine?.slice(6).trim();
+  const dataText = dataLines.map((line) => line.slice(5).trim()).join('\n');
+  try {
+    const parsed = JSON.parse(dataText) as unknown;
+    if (!isRecord(parsed)) return null;
+    const type = typeof parsed.type === 'string' ? parsed.type : eventName;
+    if (!type) return null;
+    return { ...parsed, type } as StreamEvent;
+  } catch {
+    return null;
+  }
+}
+
+function asNumberArray(value: unknown): number[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const numbers = value.map((item) => Number(item)).filter(Number.isFinite);
+  return numbers.length > 3 ? numbers : undefined;
+}
+
+function asNumber(value: unknown): number | undefined {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : undefined;
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function streamEventDelay(payload: StreamEvent) {
+  return STREAM_EVENT_DELAYS_MS[payload.type] ?? 380;
+}
 
 function useTerminalScale() {
   const [scale, setScale] = useState(1);
@@ -56,6 +157,167 @@ function pathFor(values: number[]) {
       return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
     })
     .join(' ');
+}
+
+function AgentMapNode({ definition, state }: { definition: AgentDefinition; state: AgentRuntimeState }) {
+  const status = state.status;
+  const active = status === 'running';
+  const completed = status === 'completed';
+  const failed = status === 'failed';
+  const disabled = status === 'disabled';
+  const Icon = failed ? X : completed ? Check : active ? Activity : Circle;
+  const stateText = disabled ? 'OFF' : active ? 'RUN' : completed ? 'DONE' : failed ? 'ERR' : 'IDLE';
+
+  return (
+    <div
+      className={`relative min-h-[66px] border px-3 py-2.5 transition duration-200 [@media(max-height:720px)]:min-h-[56px] [@media(max-height:720px)]:py-2 ${
+        failed
+          ? 'border-red-500/70 bg-red-500/8 text-red-200'
+          : active
+            ? 'border-[#00FF94]/80 bg-[#00FF94]/10 text-white shadow-[0_0_22px_rgba(0,255,148,0.12)]'
+            : completed
+              ? 'border-[#00FF94]/45 bg-black/45 text-white'
+              : disabled
+                ? 'border-white/8 bg-black/10 text-white/28'
+                : 'border-white/14 bg-black/25 text-white/58'
+      }`}
+    >
+      {active ? <span className="absolute -inset-px animate-pulse border border-[#00FF94]/30" /> : null}
+      <div className="relative flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <Icon size={15} strokeWidth={1.7} className={active || completed ? 'text-[#00FF94]' : failed ? 'text-red-300' : 'text-white/32'} />
+          <span className="truncate text-[11px] uppercase tracking-[0.035em]">{definition.label}</span>
+        </div>
+        <span className={`${active || completed ? 'text-[#00FF94]' : 'text-white/34'} text-[9px] uppercase tracking-[0.08em]`}>{stateText}</span>
+      </div>
+      <div className="relative mt-2 truncate text-[10px] uppercase tracking-[0.08em] text-[#8f948f] [@media(max-height:720px)]:mt-1 [@media(max-height:720px)]:text-[9px]">
+        {state.message ?? definition.id.replace(/_/g, ' ')}
+      </div>
+    </div>
+  );
+}
+
+function AgentMap({
+  type,
+  activeSources,
+  agentStates,
+  streamMessage,
+}: {
+  type: DemoType;
+  activeSources: string[];
+  agentStates: Record<string, AgentRuntimeState>;
+  streamMessage: string;
+}) {
+  const activeSourceSet = new Set(activeSources);
+  const definitions = agentDefinitions(type);
+  const columns: Array<AgentDefinition['column']> = ['source', 'analysis', 'synthesis'];
+  const columnLabels: Record<AgentDefinition['column'], string> = {
+    source: 'Inputs',
+    analysis: 'Reasoning',
+    synthesis: 'Output',
+  };
+
+  const stateFor = (definition: AgentDefinition): AgentRuntimeState => {
+    if (definition.source && !activeSourceSet.has(definition.source)) {
+      return { status: 'disabled', message: 'source disabled' };
+    }
+    return agentStates[definition.id] ?? { status: 'idle' };
+  };
+  const activeByColumn = (column: AgentDefinition['column']) =>
+    definitions
+      .filter((definition) => definition.column === column)
+      .some((definition) => {
+        const status = stateFor(definition).status;
+        return status === 'running' || status === 'completed';
+      });
+  const inputActive = activeByColumn('source');
+  const analysisActive = activeByColumn('analysis');
+
+  return (
+    <div className={`${mono.className} relative min-h-[214px] overflow-hidden border border-white/14 bg-black/28 p-4 [@media(max-height:720px)]:min-h-[178px] [@media(max-height:720px)]:p-3`}>
+      <div className="pointer-events-none absolute inset-x-8 top-1/2 h-px bg-[linear-gradient(90deg,transparent,rgba(0,255,148,0.34),rgba(0,255,148,0.08),rgba(0,255,148,0.34),transparent)]" />
+      <div className="mb-3 flex items-center justify-between gap-3 [@media(max-height:720px)]:mb-2">
+        <div className="flex items-center gap-2 text-[12px] uppercase tracking-[0.16em] text-[#9ca19c]">
+          <GitBranch size={15} strokeWidth={1.6} className="text-[#00FF94]" />
+          Agent Map
+        </div>
+        <div className="max-w-[56%] truncate text-right text-[11px] uppercase tracking-[0.12em] text-[#00FF94]">
+          {streamMessage || 'Realtime backend standby'}
+        </div>
+      </div>
+      <div className="mb-3 grid grid-cols-[minmax(0,1fr)_38px_minmax(0,1fr)_38px_minmax(0,1fr)] items-center gap-2.5 [@media(max-height:720px)]:mb-2">
+        <div className="text-[10px] uppercase tracking-[0.18em] text-white/34">{columnLabels.source}</div>
+        <ArrowRight size={18} strokeWidth={1.5} className={inputActive ? 'text-[#00FF94] drop-shadow-[0_0_8px_rgba(0,255,148,0.65)]' : 'text-white/18'} />
+        <div className="text-[10px] uppercase tracking-[0.18em] text-white/34">{columnLabels.analysis}</div>
+        <ArrowRight size={18} strokeWidth={1.5} className={analysisActive ? 'text-[#00FF94] drop-shadow-[0_0_8px_rgba(0,255,148,0.65)]' : 'text-white/18'} />
+        <div className="text-[10px] uppercase tracking-[0.18em] text-white/34">{columnLabels.synthesis}</div>
+      </div>
+      <div className="grid grid-cols-3 gap-[clamp(14px,3.1vw,52px)]">
+        {columns.map((column) => (
+          <div key={column} className="space-y-2.5">
+            {definitions
+              .filter((definition) => definition.column === column)
+              .map((definition) => (
+                <AgentMapNode key={definition.id} definition={definition} state={stateFor(definition)} />
+              ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AgentLoadingScreen({
+  type,
+  query,
+  activeSources,
+  agentStates,
+  liveSignal,
+  streamMessage,
+}: {
+  type: DemoType;
+  query: string;
+  activeSources: string[];
+  agentStates: Record<string, AgentRuntimeState>;
+  liveSignal: LiveSignalSnapshot | null;
+  streamMessage: string;
+}) {
+  const config = CONFIG[type];
+  const subject = subjectFor(type, query);
+  const model = useMemo(
+    () => buildSignalModel(type, null, true, activeSources, liveSignal),
+    [type, activeSources, liveSignal],
+  );
+
+  return (
+    <main className="absolute inset-0 z-20 grid h-dvh w-full place-items-center overflow-hidden bg-[#020403] px-[clamp(18px,4vw,56px)] py-[clamp(14px,2.4vh,28px)]">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,255,148,0.045),transparent_28%,rgba(0,0,0,0.42))]" />
+      <div className={`${mono.className} relative w-full max-w-[920px]`}>
+        <div className="mb-[clamp(12px,2vh,20px)] grid grid-cols-[minmax(0,1fr)_auto] items-end gap-6">
+          <div className="min-w-0">
+            <div className="mb-2 text-[12px] uppercase tracking-[0.22em] text-[#00FF94]">// {config.env}</div>
+            <h1 className={`${type === 'stock' ? 'uppercase tracking-[0.06em]' : 'tracking-[-0.035em]'} max-w-[760px] whitespace-normal break-words text-[clamp(28px,5.3vw,58px)] font-light leading-[0.98] text-white [@media(max-height:720px)]:text-[34px] [@media(max-height:520px)]:text-[28px]`}>
+              {subject}
+            </h1>
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-[#8f948f]">{config.signalLabel}</div>
+            <div className="text-[42px] leading-none text-[#00FF94]">{model.confidence}%</div>
+          </div>
+        </div>
+
+        <div className="border border-white/18 bg-black/52 p-[clamp(14px,2vh,20px)] shadow-[0_0_90px_rgba(0,0,0,0.72)]">
+          <div className="mb-[clamp(12px,1.8vh,20px)] flex items-center justify-between gap-4 border-b border-white/12 pb-3">
+            <div className="text-[13px] uppercase tracking-[0.18em] text-white/70">Analysis boot sequence</div>
+          </div>
+          <AgentMap type={type} activeSources={activeSources} agentStates={agentStates} streamMessage={streamMessage} />
+          <div className="mt-[clamp(12px,1.8vh,20px)] max-h-[28vh] overflow-hidden [@media(max-height:640px)]:hidden">
+            <SignalChart type={type} model={model} isSearching />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
 }
 
 function SideRail({ type }: { type: DemoType }) {
@@ -296,6 +558,7 @@ function TerminalSearchPage({
   onSubmit,
   analysis,
   activeSources,
+  liveSignal,
   onToggleSource,
   tierName,
   searchCount,
@@ -308,6 +571,7 @@ function TerminalSearchPage({
   onSubmit: (event: React.FormEvent) => void;
   analysis: string | null;
   activeSources: string[];
+  liveSignal: LiveSignalSnapshot | null;
   onToggleSource: (id: string) => void;
   tierName: string;
   searchCount: number;
@@ -317,8 +581,8 @@ function TerminalSearchPage({
   const subject = subjectFor(type, query);
   const scale = useTerminalScale();
   const model = useMemo(
-    () => buildSignalModel(type, analysis, isSearching, activeSources),
-    [type, analysis, isSearching, activeSources],
+    () => buildSignalModel(type, analysis, isSearching, activeSources, liveSignal),
+    [type, analysis, isSearching, activeSources, liveSignal],
   );
 
   return (
@@ -343,12 +607,14 @@ function TerminalSearchPage({
         </section>
 
         <section className="mx-auto mt-[clamp(20px,3.2vh,34px)] w-full max-w-[1040px] border border-white/22 bg-black/45 px-5 py-5 shadow-[0_0_80px_rgba(0,0,0,0.8)]">
-          <div className="grid h-[154px] grid-cols-[minmax(360px,1.3fr)_minmax(250px,0.85fr)_minmax(260px,0.9fr)] border-b border-white/16 pb-6">
-            <div className="grid min-w-0 grid-rows-[22px_62px_18px] border-r border-white/16 pl-5 pr-8 pt-6">
+          <div className="grid min-h-[154px] grid-cols-[minmax(360px,1.3fr)_minmax(250px,0.85fr)_minmax(260px,0.9fr)] border-b border-white/16 pb-6">
+            <div className="grid min-w-0 grid-rows-[22px_minmax(62px,auto)_18px] border-r border-white/16 pl-5 pr-8 pt-6">
               <div className={`${mono.className} text-[12px] uppercase tracking-[0.2em] text-[#8f948f]`}>
                 {type === 'stock' ? 'Ticker' : 'Event'}
               </div>
-              <div className={`${type === 'stock' ? 'text-[clamp(46px,6.2vw,62px)] tracking-[0.08em]' : 'text-[clamp(38px,4.55vw,48px)] tracking-[-0.04em]'} flex min-w-0 items-center truncate font-light leading-none text-white`}>
+              <div
+                className={`${type === 'stock' ? 'items-center text-[clamp(46px,6.2vw,62px)] uppercase leading-none tracking-[0.08em]' : 'items-start pt-1 text-[clamp(28px,3.35vw,42px)] leading-[1.04] tracking-[-0.045em]'} flex min-w-0 whitespace-normal break-words font-light text-white`}
+              >
                 {subject}
               </div>
               <div className={`${mono.className} truncate text-[12px] uppercase tracking-[0.2em] text-[#8f948f]`}>
@@ -391,9 +657,6 @@ function TerminalSearchPage({
           </div>
         </section>
 
-        <div className={`${mono.className} pt-[clamp(18px,2.4vh,30px)] text-center text-[11px] uppercase tracking-[0.24em] text-[#7d827d]`}>
-          Past performance is not indicative of future results. Intelligence is probabilistic.
-        </div>
       </div>
       </div>
     </main>
@@ -408,6 +671,9 @@ export function DemoTerminalPage({ type }: { type: DemoType }) {
   const [error, setError] = useState<string | null>(null);
   const [showOverlay, setShowOverlay] = useState(false);
   const [activeSources, setActiveSources] = useState(() => config.sources.map((source) => source.id));
+  const [agentStates, setAgentStates] = useState<Record<string, AgentRuntimeState>>({});
+  const [liveSignal, setLiveSignal] = useState<LiveSignalSnapshot | null>(null);
+  const [streamMessage, setStreamMessage] = useState('');
   const { searchCount, maxSearches, tierName, incrementSearch, isInitialized } = useSearchLimit();
 
   const toggleSource = (id: string) => {
@@ -417,6 +683,97 @@ export function DemoTerminalPage({ type }: { type: DemoType }) {
       }
       return [...current, id];
     });
+  };
+
+  const updateAgentState = (agent: string, status: AgentStatus, message?: string) => {
+    setAgentStates((current) => ({
+      ...current,
+      [agent]: { status, message },
+    }));
+  };
+
+  const handleStreamEvent = (payload: StreamEvent) => {
+    if (payload.type === 'run_started') {
+      setStreamMessage('Realtime graph online');
+      return;
+    }
+
+    if (payload.agent) {
+      if (payload.type === 'agent_started' || payload.type === 'agent_progress') {
+        updateAgentState(payload.agent, 'running', payload.message);
+        setStreamMessage(payload.message ?? `${payload.agent.replace(/_/g, ' ')} running`);
+      }
+      if (payload.type === 'agent_completed') {
+        updateAgentState(payload.agent, 'completed', payload.message);
+        setStreamMessage(payload.message ?? `${payload.agent.replace(/_/g, ' ')} complete`);
+      }
+      if (payload.type === 'run_error') {
+        updateAgentState(payload.agent, 'failed', payload.message);
+        setStreamMessage(payload.message ?? 'Backend run failed');
+      }
+    }
+
+    if (payload.type === 'chart_update') {
+      setLiveSignal((current) => ({
+        ...current,
+        chartValues: asNumberArray(payload.chart) ?? current?.chartValues,
+        confidence: asNumber(payload.confidence) ?? current?.confidence,
+        status: typeof payload.status === 'string' ? payload.status : current?.status,
+      }));
+    }
+
+    if (payload.type === 'final_result') {
+      const finalData = payload.data;
+      const finalAnalysis =
+        typeof payload.analysis === 'string'
+          ? payload.analysis
+          : typeof finalData?.analysis === 'string'
+            ? finalData.analysis
+            : null;
+
+      if (finalAnalysis) setAnalysis(finalAnalysis);
+      setLiveSignal((current) => ({
+        ...current,
+        chartValues: asNumberArray(finalData?.chart) ?? current?.chartValues,
+        confidence: asNumber(finalData?.confidence) ?? current?.confidence,
+        status:
+          type === 'stock'
+            ? String(finalData?.signal ?? 'READY').toUpperCase()
+            : String(finalData?.advisory ?? 'READY').toUpperCase(),
+        secondaryStatus: 'GRAPH COMPLETE',
+      }));
+      setStreamMessage('Synthesis complete');
+    }
+  };
+
+  const consumeSseResponse = async (response: Response) => {
+    if (!response.body) throw new Error('Missing response stream');
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split('\n\n');
+      buffer = blocks.pop() ?? '';
+      for (const block of blocks) {
+        const parsed = parseSseBlock(block.trim());
+        if (parsed) {
+          handleStreamEvent(parsed);
+          await wait(streamEventDelay(parsed));
+        }
+      }
+    }
+
+    if (buffer.trim()) {
+      const parsed = parseSseBlock(buffer.trim());
+      if (parsed) {
+        handleStreamEvent(parsed);
+        await wait(streamEventDelay(parsed));
+      }
+    }
   };
 
   const runSearch = async (event: React.FormEvent) => {
@@ -429,9 +786,14 @@ export function DemoTerminalPage({ type }: { type: DemoType }) {
       return;
     }
 
+    const loadingStartedAt = Date.now();
+    let shouldHoldLoading = false;
     setIsSearching(true);
     setAnalysis(null);
     setError(null);
+    setAgentStates({});
+    setLiveSignal({ status: 'SCANNING', secondaryStatus: 'NODES BOOTING' });
+    setStreamMessage('Opening realtime graph');
 
     try {
       const {
@@ -443,13 +805,22 @@ export function DemoTerminalPage({ type }: { type: DemoType }) {
           'Content-Type': 'application/json',
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
-        body: JSON.stringify({ topic, type }),
+        body: JSON.stringify({ topic, type, sources: activeSources }),
       });
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}: Failed to reach PolyHedge Intelligence`);
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error || `HTTP ${response.status}: Failed to reach PolyHedge Intelligence`);
+      }
 
-      setAnalysis(data.analysis);
+      if (response.headers.get('content-type')?.includes('text/event-stream')) {
+        await consumeSseResponse(response);
+      } else {
+        const data = await response.json();
+        setAnalysis(data.analysis);
+      }
+      shouldHoldLoading = true;
+
       if (posthogKey) {
         posthog.capture(type === 'stock' ? 'stock_search_performed' : 'prediction_search_performed', {
           query: topic,
@@ -461,6 +832,9 @@ export function DemoTerminalPage({ type }: { type: DemoType }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown network error');
     } finally {
+      if (shouldHoldLoading) {
+        await wait(Math.max(0, MIN_LOADING_DURATION_MS - (Date.now() - loadingStartedAt)));
+      }
       setIsSearching(false);
     }
   };
@@ -476,19 +850,31 @@ export function DemoTerminalPage({ type }: { type: DemoType }) {
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_46%_24%,rgba(255,255,255,0.06),transparent_30%),radial-gradient(circle_at_76%_58%,rgba(0,255,148,0.035),transparent_34%)]" />
       <SideRail type={type} />
       <div className="relative ml-14 h-dvh w-[calc(100vw-3.5rem)]">
-        <TerminalSearchPage
-          type={type}
-          query={query}
-          setQuery={setQuery}
-          isSearching={isSearching}
-          onSubmit={runSearch}
-          analysis={analysis}
-          activeSources={activeSources}
-          onToggleSource={toggleSource}
-          tierName={tierName}
-          searchCount={searchCount}
-          maxSearches={maxSearches}
-        />
+        {isSearching ? (
+          <AgentLoadingScreen
+            type={type}
+            query={query}
+            activeSources={activeSources}
+            agentStates={agentStates}
+            liveSignal={liveSignal}
+            streamMessage={streamMessage}
+          />
+        ) : (
+          <TerminalSearchPage
+            type={type}
+            query={query}
+            setQuery={setQuery}
+            isSearching={false}
+            onSubmit={runSearch}
+            analysis={analysis}
+            activeSources={activeSources}
+            liveSignal={liveSignal}
+            onToggleSource={toggleSource}
+            tierName={tierName}
+            searchCount={searchCount}
+            maxSearches={maxSearches}
+          />
+        )}
       </div>
 
       {error ? (
