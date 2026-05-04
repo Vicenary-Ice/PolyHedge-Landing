@@ -13,6 +13,65 @@ const TIER_LIMITS: Record<string, number> = {
 };
 const MODEL = 'meta/llama-3.1-8b-instruct';
 const BASE_URL = 'https://integrate.api.nvidia.com/v1';
+const DEMO_KEY_MARKERS = ['dummy', 'demo', 'local'];
+
+function shouldUseDemoAnalysis() {
+  if (process.env.POLYHEDGE_DEMO_MODE === 'true') return true;
+  if (process.env.NODE_ENV === 'production') return false;
+  if (!NVIDIA_API_KEY) return true;
+  return DEMO_KEY_MARKERS.some((marker) => NVIDIA_API_KEY.toLowerCase().includes(marker));
+}
+
+function buildDemoAnalysis(topic: string, type: string) {
+  if (type === 'stock') {
+    return `### [THESIS_EXECUTIVE_SUMMARY]
+${topic.toUpperCase()} is currently running in DEMO MODE with a synthetic institutional signal. The terminal is showing how the paid workflow will feel once live market data, filings, news, and alternative-data collectors are connected. The provisional signal is constructive, but it is not sourced from a real equity-data backend yet.
+
+### [VECTORED_ATTRIBUTION_FEED]
+The demo engine is simulating a blended feed made from price momentum, institutional flow, volatility compression, and public narrative velocity. In the production system, this section should be backed by real market-data vendors, SEC filings, news retrieval, and event-detection jobs.
+
+### [QUANT_PROJECTION_MODEL]
+The projected path shows a controlled upward drift with moderate volatility. This is a UI validation payload designed to exercise charts, metrics, and report formatting without requiring NVIDIA or data-provider keys.
+
+### [STRATEGIC_PULSE_VERDICT]
+INDICATOR: "SIGNAL: POSITIVE"
+CONFIDENCE_RATING: 82%
+
+<ANALYSIS_METADATA>
+RISK: 38
+MOMENTUM: 76
+VOLATILITY: 18
+FLOW: 71
+CHART: [12, 18, 24, 28, 36, 42, 49, 57]
+</ANALYSIS_METADATA>`;
+  }
+
+  return `### [FORECAST_SWARM_THESIS]
+${topic.toUpperCase()} is running through a DEMO MODE probability workflow. The terminal is simulating how a paid prediction-market intelligence report will render once live odds, event feeds, and source-backed retrieval are connected. FORENSIC PROBABILITY is estimated at 64% for demonstration purposes.
+
+### [MARKET_CONSENSUS_FRICTION]
+NO LIVE MARKET DETECTED in demo mode. Using a 50% synthetic baseline to validate the wedge display, chart parser, and advisory rendering.
+
+### [FORENSIC_INTELLIGENCE]
+FORENSIC_CALIBRATION_SIGNALS are synthetic. Calibration Health is MEDIUM, with an Expected Calibration Error of 0.8%. Production should replace this with current Polymarket/CLOB data plus historical calibration checks.
+
+### [PROBABILISTIC_PIVOT_DECAY]
+The simulated outcome tree shows a positive probability drift as newer signals arrive. This is not investment advice; it is a local demonstration response designed to prove the product shell works without credentials.
+
+### [STRATEGIC_PULSE_VERDICT]
+INDICATOR: "SIGNAL: VALUE WEDGE"
+ADVISORY: "LONG YES"
+WEDGE_MAGNITUDE: 14%
+
+<ANALYSIS_METADATA>
+RISK: 42
+HEAT: 68
+EDGE: 14
+CALIBRATION: 92
+VOLATILITY: 20
+CHART: [42, 45, 49, 52, 57, 61, 64, 66]
+</ANALYSIS_METADATA>`;
+}
 
 export async function POST(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(7);
@@ -23,6 +82,11 @@ export async function POST(request: NextRequest) {
 
     if (!topic || !type) {
       return NextResponse.json({ error: 'Topic and type are required' }, { status: 400 });
+    }
+
+    if (shouldUseDemoAnalysis()) {
+      console.log(`[${requestId}] Demo analysis returned; real NVIDIA key not configured.`);
+      return NextResponse.json({ analysis: buildDemoAnalysis(topic, type) });
     }
 
     // Enforce search limit server-side using the user's JWT

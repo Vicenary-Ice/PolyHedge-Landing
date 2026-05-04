@@ -1,18 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { hasSupabaseConfig, supabase } from '@/lib/supabase';
 import {
   SUBSCRIPTION_TIERS,
   DEFAULT_TIER,
   TIER_STORAGE_KEY,
   TierName,
 } from '../constants/tiers';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
 
 export { supabase };
 
@@ -25,6 +20,12 @@ export function useSearchLimit() {
     const savedTier = localStorage.getItem(TIER_STORAGE_KEY) as TierName;
     if (savedTier && SUBSCRIPTION_TIERS[savedTier]) {
       setTier(savedTier);
+    }
+
+    if (!hasSupabaseConfig) {
+      setSearchCount(0);
+      setIsInitialized(true);
+      return;
     }
 
     // onAuthStateChange fires immediately with INITIAL_SESSION — more reliable than getSession()
@@ -55,6 +56,11 @@ export function useSearchLimit() {
   }, []);
 
   const incrementSearch = useCallback(async () => {
+    if (!hasSupabaseConfig) {
+      setSearchCount((count) => count + 1);
+      return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
 
@@ -68,6 +74,11 @@ export function useSearchLimit() {
   }, [searchCount]);
 
   const resetSearches = useCallback(async () => {
+    if (!hasSupabaseConfig) {
+      setSearchCount(0);
+      return;
+    }
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
     setSearchCount(0);

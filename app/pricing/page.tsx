@@ -5,17 +5,12 @@ import { motion } from 'framer-motion';
 import { Check, Shield, Zap, Cpu } from 'lucide-react';
 import { Geist } from 'next/font/google';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@supabase/supabase-js';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { FloatingParticles } from '@/components/background-effects';
 import { TickerBar, Navbar } from '@/components/navigation';
 import posthog from 'posthog-js';
 import { TIER_STORAGE_KEY } from '@/lib/constants/tiers';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-);
+import { hasSupabaseConfig, supabase } from '@/lib/supabase';
 
 const geist = Geist({ subsets: ['latin'] });
 
@@ -44,7 +39,9 @@ function PricingCard({ name, price, description, features, recommended, icon }: 
       posthog.capture('checkout_initiated', { plan_name: name, price_usd: Number(price) });
 
       if (Number(price) === 0) {
-        await supabase.auth.updateUser({ data: { tier: name } });
+        if (hasSupabaseConfig) {
+          await supabase.auth.updateUser({ data: { tier: name } });
+        }
         localStorage.setItem(TIER_STORAGE_KEY, name);
         router.push('/demo');
         return;
